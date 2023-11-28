@@ -32,7 +32,6 @@
 #include <grp.h>
 #include <pwd.h>
 #include <n4d.hpp>
-#include <user.hpp>
 #include <variant.hpp>
 #include <n4d.hpp>
 #include <variant.hpp>
