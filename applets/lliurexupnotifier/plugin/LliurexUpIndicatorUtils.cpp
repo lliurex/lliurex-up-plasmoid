@@ -1,0 +1,316 @@
+/*
+ * Copyright (C) 2023 Juan Ramon Pelegrina <juapesai@hotmail.com>
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+#include "LliurexUpIndicatorUtils.h"
+
+#include <QFile>
+#include <QDateTime>
+#include <QFileInfo>
+#include <QRegularExpression>
+#include <QStandardPaths>
+#include <QDebug>
+#include <QtDBus/QtDBus>
+#include <QDBusInterface>
+#include <QDBusMetaType>
+#include <QDBusConnection>
+#include <chrono>
+#include <sys/types.h>
+#include <grp.h>
+#include <pwd.h>
+#include <n4d.hpp>
+#include <user.hpp>
+#include <variant.hpp>
+#include <n4d.hpp>
+#include <variant.hpp>
+
+using namespace edupals;
+using namespace std;
+
+LliurexUpIndicatorUtils::LliurexUpIndicatorUtils(QObject *parent)
+    : QObject(parent)
+       
+{
+    PKGCACHE.setFileName("/var/cache/apt/pkgcache.bin");
+  
+}    
+
+QStringList LliurexUpIndicatorUtils::getFlavours(){
+
+    QProcess process;
+    QStringList flavours;
+    QString cmd="lliurex-version -v";
+    process.start("/bin/sh",QStringList()<<"-c"<<cmd);
+    process.waitForFinished(-1);
+    QString stdout=process.readAllStandardOutput();
+    QString stderr=process.readAllStandardError();
+    flavours=stdout.split('\n');
+
+    return flavours;
+
+}
+
+QStringList LliurexUpIndicatorUtils::getUserGroups(){
+    
+
+    int j, ngroups=32;
+    gid_t groups[32];
+    struct passwd *pw;
+    struct group *gr;
+    QStringList userGroups;
+
+
+    QString user=qgetenv("USER");
+    QByteArray uname = user.toLocal8Bit();
+    const char *username = uname.data();
+    pw=getpwnam(username);
+    getgrouplist(username, pw->pw_gid, groups, &ngroups);
+    for (j = 0; j < ngroups; j++) {
+        gr = getgrgid(groups[j]);
+        if (gr != NULL)
+        if ((strcmp(gr->gr_name,"adm")==0)||(strcmp(gr->gr_name,"admins")==0)||(strcmp(gr->gr_name,"teachers")==0)){
+            userGroups.append(gr->gr_name);
+        }    
+
+    }
+    return userGroups;
+}    
+
+static bool simulateUpgrade(){
+
+    try{
+        
+        QDBusInterface iface("org.debian.apt",  // from list on left
+                         "/org/debian/apt", // from first line of screenshot
+                         "org.debian.apt",  // from above Methods
+                         QDBusConnection::systemBus());
+
+   
+        QDBusMessage result=iface.call("UpgradeSystem",true);
+        QString transaction=result.arguments()[0].toString();
+        
+        QDBusInterface ifaceS("org.debian.apt",  // from list on left
+                        transaction, // from first line of screenshot
+                        "org.debian.apt.transaction",  // from above Methods
+                         QDBusConnection::systemBus());
+
+         
+   
+        ifaceS.call("Simulate");
+      
+        QDBusInterface ifaceR("org.debian.apt",  // from list on left
+                        transaction, // from first line of screenshot
+                        "org.freedesktop.DBus.Properties",  // from above Methods
+                         QDBusConnection::systemBus());
+
+        
+
+        QDBusMessage reply = ifaceR.call("Get", "org.debian.apt.transaction", "Dependencies");
+         
+        const QDBusArgument& dbusArgs=reply.arguments()[0].value<QDBusVariant>().variant().value<QDBusArgument>();
+         
+        QVariantList pkg_list;
+
+        dbusArgs.beginStructure();
+
+        int cont=0;
+
+        while(!dbusArgs.atEnd()) {
+            cont=cont+1;
+            if (cont<6){
+                dbusArgs.beginArray();
+
+                while(!dbusArgs.atEnd()) {
+                    QString s;
+                    dbusArgs>>s;
+                    pkg_list.push_back(s);
+                } 
+            }      
+
+            dbusArgs.endArray();
+                           
+        }       
+        
+        dbusArgs.endStructure();
+
+        if (pkg_list.size()>0){
+            return true;
+        }else{
+            return false;
+        } 
+        
+  
+    }catch(...){
+
+        return false;
+    }      
+
+}
+
+bool LliurexUpIndicatorUtils::runUpdateCache(){
+    
+    if (!cacheUpdated){
+
+        if (!QDBusConnection::sessionBus().isConnected()) {
+            fprintf(stderr, "Cannot connect to the D-Bus session bus.\n"
+                    "To start it, run:\n"
+                    "\teval `dbus-launch --auto-syntax`\n");
+            return false;
+        }
+        
+          
+        try{
+            QDBusInterface iface("org.debian.apt",  // from list on left
+                             "/org/debian/apt", // from first line of screenshot
+                             "org.debian.apt",  // from above Methods
+                             QDBusConnection::systemBus());
+
+
+            
+            QDBusMessage resultU=iface.call("UpdateCache");
+            QString transactionU=resultU.arguments()[0].toString();
+            
+            QDBusInterface ifaceR("org.debian.apt",  // from list on left
+                            transactionU, // from first line of screenshot
+                            "org.debian.apt.transaction", // from above Methods
+                             QDBusConnection::systemBus());
+
+
+           
+
+            ifaceR.asyncCall("Run");
+
+            QDBusInterface ifaceS("org.debian.apt",  // from list on left
+                            transactionU, // from first line of screenshot
+                            "org.freedesktop.DBus.Properties",  // from above Methods
+                             QDBusConnection::systemBus());
+
+         
+            std::this_thread::sleep_for(std::chrono::seconds(10));
+
+            int match=0;
+            int cont=0;
+            int timeout=300;
+
+            while (match==0){
+                std::this_thread::sleep_for(std::chrono::seconds(1));
+                QDBusMessage replyS = ifaceS.call("Get", "org.debian.apt.transaction", "ExitState");
+                QString state = replyS.arguments()[0].value<QDBusVariant>().variant().toString();
+                if (state != "exit-unfinished"){
+                    match=1;
+                }else{
+                    cont=cont+1;
+                    if (cont>timeout){
+                        return false;
+                    }
+
+                }
+
+            }
+
+        }catch(...){
+            return false;   
+        }
+    }
+    cacheUpdated=false;
+    return simulateUpgrade();
+}
+
+bool LliurexUpIndicatorUtils::checkRemote(){
+
+    int cont=0;
+
+    QStringList remote_pts;
+    QProcess process;
+    QString cmd="who | grep -v \"(:0\"";
+
+    process.start("/bin/sh", QStringList()<< "-c" 
+                       << cmd);
+    process.waitForFinished(-1);
+    QString stdout=process.readAllStandardOutput();
+    QString stderr=process.readAllStandardError();
+    QStringList remote_users=stdout.split("\n");
+    remote_users.takeLast();
+
+    if (remote_users.size()>0){
+        QRegularExpression re("pts/\\d+");
+        QRegularExpressionMatch match = re.match(remote_users[0]);
+        if (match.hasMatch()) {
+            QString matched = match.captured(0);
+            remote_pts.push_back(matched);
+        }  
+    }      
+
+    QProcess process2;
+    QString cmd2="ps -ef | grep 'lliurex-upgrade' | grep -v 'grep'";
+    process2.start("/bin/sh", QStringList()<< "-c" 
+                       << cmd2);
+    process2.waitForFinished(-1);
+    QString stdout2=process2.readAllStandardOutput();
+    QString stderr2=process2.readAllStandardError();
+    QStringList remote_process=stdout2.split("\n");
+    remote_process.takeLast();
+
+    for(int i=0 ; i < remote_process.length() ; i++){
+       if (remote_process[i].contains("?")){
+           cont=cont+1;
+       } // -> True
+
+       for (int j=0; j<remote_pts.length();j++){
+            if (remote_process[i].contains(remote_pts[j])){
+                cont=cont+1;
+            }
+       }
+    }
+
+    if (cont>0){
+        return true;
+
+    }else{
+        return false;
+    }
+
+}  
+
+bool LliurexUpIndicatorUtils::isCacheUpdated(){
+
+    QDateTime currentTime=QDateTime::currentDateTime();
+    QDateTime lastModification=QFileInfo(PKGCACHE).lastModified();    
+
+    qint64 millisecondsDiff = lastModification.msecsTo(currentTime);
+
+    if (millisecondsDiff<APT_FRECUENCY){
+        cacheUpdated=true;
+    }
+    return cacheUpdated;
+
+}
+
+bool LliurexUpIndicatorUtils::isConnectionWithServer(){
+
+    n4d::Client client;
+
+    client=n4d::Client("https://server:9779");
+    try{
+        variant::Variant test=client.call("MirrorManager","is_alive");
+        return true;
+               
+    }catch(...){
+        return false;
+    }
+     
+}
+
