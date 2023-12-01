@@ -76,6 +76,8 @@ void LliurexUpIndicator::plasmoidMode(){
                 }
             }
         }
+    }else{
+        hideIndicator=true;
     }
 
     if (isClient){
