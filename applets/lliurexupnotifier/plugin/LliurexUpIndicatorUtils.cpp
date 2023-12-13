@@ -121,7 +121,7 @@ static bool simulateUpgrade(){
          
         const QDBusArgument& dbusArgs=reply.arguments()[0].value<QDBusVariant>().variant().value<QDBusArgument>();
          
-        QVariantList pkg_list;
+        QVariantList pkgList;
 
         dbusArgs.beginStructure();
 
@@ -135,7 +135,7 @@ static bool simulateUpgrade(){
                 while(!dbusArgs.atEnd()) {
                     QString s;
                     dbusArgs>>s;
-                    pkg_list.push_back(s);
+                    pkgList.push_back(s);
                 } 
             }      
 
@@ -145,7 +145,7 @@ static bool simulateUpgrade(){
         
         dbusArgs.endStructure();
 
-        if (pkg_list.size()>0){
+        if (pkgList.size()>0){
             return true;
         }else{
             return false;
@@ -232,7 +232,7 @@ bool LliurexUpIndicatorUtils::checkRemote(){
 
     int cont=0;
 
-    QStringList remote_pts;
+    QStringList remotePts;
     QProcess process;
     QString cmd="who | grep -v \"(:0\"";
 
@@ -241,15 +241,15 @@ bool LliurexUpIndicatorUtils::checkRemote(){
     process.waitForFinished(-1);
     QString stdout=process.readAllStandardOutput();
     QString stderr=process.readAllStandardError();
-    QStringList remote_users=stdout.split("\n");
-    remote_users.takeLast();
+    QStringList remoteUsers=stdout.split("\n");
+    remoteUsers.takeLast();
 
-    if (remote_users.size()>0){
+    if (remoteUsers.size()>0){
         QRegularExpression re("pts/\\d+");
-        QRegularExpressionMatch match = re.match(remote_users[0]);
+        QRegularExpressionMatch match = re.match(remoteUsers[0]);
         if (match.hasMatch()) {
             QString matched = match.captured(0);
-            remote_pts.push_back(matched);
+            remotePts.push_back(matched);
         }  
     }      
 
@@ -260,16 +260,16 @@ bool LliurexUpIndicatorUtils::checkRemote(){
     process2.waitForFinished(-1);
     QString stdout2=process2.readAllStandardOutput();
     QString stderr2=process2.readAllStandardError();
-    QStringList remote_process=stdout2.split("\n");
-    remote_process.takeLast();
+    QStringList remoteProcess=stdout2.split("\n");
+    remoteProcess.takeLast();
 
-    for(int i=0 ; i < remote_process.length() ; i++){
-       if (remote_process[i].contains("?")){
+    for(int i=0 ; i < remoteProcess.length() ; i++){
+       if (remoteProcess[i].contains("?")){
            cont=cont+1;
        } // -> True
 
-       for (int j=0; j<remote_pts.length();j++){
-            if (remote_process[i].contains(remote_pts[j])){
+       for (int j=0; j<remotePts.length();j++){
+            if (remoteProcess[i].contains(remotePts[j])){
                 cont=cont+1;
             }
        }

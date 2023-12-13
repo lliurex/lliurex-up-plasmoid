@@ -25,6 +25,7 @@
 #include <QDir>
 #include <QFile>
 #include <QThread>
+#include <QFileSystemWatcher>
 
 #include "LliurexUpIndicatorUtils.h"
 
@@ -75,7 +76,9 @@ public:
 
 public slots:
     
+    void initWatcher();
     void worker();
+    void isLliurexUpRunning();
     void checkLlxUp();
     void launch_llxup();
 
@@ -101,12 +104,13 @@ private:
     int FREQUENCY=3600;
     bool updatedInfo=false;
     bool remoteUpdateInfo=false;
-    bool is_working=false;
-    int last_check=1205;
-    int last_update=0;
+    bool isWorking=false;
+    int lastUpdate=0;
     LliurexUpIndicatorUtils* m_utils;
     QPointer<KNotification> m_updatesAvailableNotification;
     QPointer<KNotification> m_remoteUpdateNotification;
+    QFileSystemWatcher *watcher = nullptr;
+    QString refPath="/var/run";
 
 private slots:
 

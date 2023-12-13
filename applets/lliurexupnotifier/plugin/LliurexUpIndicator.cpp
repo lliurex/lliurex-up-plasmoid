@@ -27,6 +27,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QThread>
+#include <QFileSystemWatcher>
 
 
 LliurexUpIndicator::LliurexUpIndicator(QObject *parent)
@@ -43,7 +44,8 @@ LliurexUpIndicator::LliurexUpIndicator(QObject *parent)
     plasmoidMode();
 
     connect(m_timer, &QTimer::timeout, this, &LliurexUpIndicator::worker);
-    m_timer->start(5000);
+    m_timer->start(1200000);
+    initWatcher();
     worker();
 }    
 
@@ -96,28 +98,46 @@ void LliurexUpIndicator::plasmoidMode(){
  
 }
 
+void LliurexUpIndicator::initWatcher(){
+
+    QDir TARGET_DIR(refPath);
+
+    if (TARGET_DIR.exists()){
+        isLliurexUpRunning();
+    }
+
+    watcher=new QFileSystemWatcher(this);
+    connect(watcher,SIGNAL(directoryChanged(QString)),this,SLOT(isLliurexUpRunning()));
+    watcher->addPath(refPath);
+
+}
+
+void LliurexUpIndicator::isLliurexUpRunning(){
+
+    if (!isWorking){
+        if (LliurexUpIndicator::TARGET_FILE.exists()) {
+            isAlive();
+        }
+    }
+}
+
 void LliurexUpIndicator::worker(){
 
-    if (!is_working){
+    if (!isWorking){
         if (LliurexUpIndicator::TARGET_FILE.exists() ) {
             isAlive();
         }else{
             if (updatedInfo){
                 if (!remoteUpdateInfo){
-                    last_update=last_update+5;
-                    last_check=last_check+5;
-                    if (last_update>FREQUENCY){
-                        last_update=0;
-                        last_check=0;
+                    lastUpdate=lastUpdate+1200;
+                    if (lastUpdate==FREQUENCY){
+                        lastUpdate=0;
                         updateCache();
 
                     }else{
-                        if (last_check>1200){
-                            last_check=0;
-                            if (m_utils->isCacheUpdated()){
-                                last_update=0;
-                                updateCache();
-                            }
+                        if (m_utils->isCacheUpdated()){
+                            lastUpdate=0;
+                            updateCache();
                         }
                     }
                 }
@@ -130,7 +150,7 @@ void LliurexUpIndicator::worker(){
 
 void LliurexUpIndicator::updateCache(){
 
-    is_working=true;
+    isWorking=true;
 
     adbus=new AsyncDbus(this);
     QObject::connect(adbus,SIGNAL(message(bool)),this,SLOT(dbusDone(bool)));
@@ -146,7 +166,7 @@ bool LliurexUpIndicator::runUpdateCache(){
 
 void LliurexUpIndicator::dbusDone(bool result){
 
-    is_working=false;
+    isWorking=false;
         
     adbus->exit(0);
     if (adbus->wait()){
@@ -161,7 +181,7 @@ void LliurexUpIndicator::dbusDone(bool result){
 
 void LliurexUpIndicator::isAlive(){
 
-    is_working=true;
+    isWorking=true;
     remoteUpdateInfo=true;
 
     if (m_utils->checkRemote()){
@@ -181,7 +201,7 @@ void LliurexUpIndicator::checkLlxUp(){
 
     if (!LliurexUpIndicator::TARGET_FILE.exists()){
         m_timer_run->stop();
-        is_working=false;
+        isWorking=false;
         remoteUpdateInfo=false;
         changeTryIconState(1);
           
