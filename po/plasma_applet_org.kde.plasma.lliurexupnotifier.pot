@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lliurexupnotifier \n"
 "Report-Msgid-Bugs-To: http://lliurex.net\n"
-"POT-Creation-Date: 2019-10-18 09:54+0200\n"
+"POT-Creation-Date: 2023-12-18 10:30+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,28 +17,32 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../applets/lliurexupnotifier/package/contents/ui/main.qml:45 ../debian/plasma-widget-lliurex-up-notifier/usr/share/plasma/plasmoids/org.kde.plasma.lliurexupnotifier/contents/ui/main.qml:45
-#: ../debian/tmp/usr/share/plasma/plasmoids/org.kde.plasma.lliurexupnotifier/contents/ui/main.qml:45
+#: ../applets/lliurexupnotifier/package/contents/ui/main.qml:26
 #, kde-format
 msgid "Update the system"
 msgstr ""
 
-#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:97
+#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:219
 #, kde-format
 msgid "Lliurex-Up"
 msgstr ""
 
-#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:101
+#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:222
 #, kde-format
 msgid "There are new packages ready to be updated or installed"
 msgstr ""
 
-#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:109
+#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:227
 #, kde-format
 msgid "Update now"
 msgstr ""
 
-#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:116
+#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:235
 #, kde-format
-msgid "Lliurex-Up is being executed"
+msgid "Lliurex-Up is being run remotely or automatically"
+msgstr ""
+
+#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:236
+#, kde-format
+msgid "Do not turn-off or restart your computer"
 msgstr ""

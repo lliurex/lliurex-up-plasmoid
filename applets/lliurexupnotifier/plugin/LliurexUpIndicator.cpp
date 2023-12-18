@@ -231,12 +231,14 @@ void LliurexUpIndicator::changeTryIconState(int state){
 
 
     }else if (state==2){
-        setStatus(NeedsAttentionStatus);
-        const QString subtooltip(i18n("Lliurex-Up is being executed"));
+        setStatus(ActiveStatus);
+        const QString title(i18n("Lliurex-Up is being run remotely or automatically"));
+        const QString body(i18n("Do not turn-off or restart your computer"));
+        const QString subtooltip=title+"\n"+body;
         setToolTip(tooltip);
         setSubToolTip(subtooltip);
         setIconName("lliurexupnotifier-running");
-        m_remoteUpdateNotification = KNotification::event(QStringLiteral("remoteUpdate"), subtooltip, {}, "lliurex-up-indicator", nullptr, KNotification::CloseOnTimeout , QStringLiteral("llxupnotifier"));
+        m_remoteUpdateNotification = KNotification::event(QStringLiteral("remoteUpdate"), title,body, "lliurex-up-indicator", nullptr, KNotification::CloseOnTimeout , QStringLiteral("llxupnotifier"));
 
     }else{
         setStatus(PassiveStatus);

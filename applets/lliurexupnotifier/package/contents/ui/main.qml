@@ -19,11 +19,12 @@ Item {
     Plasmoid.status: {
         /* Warn! Enum types are accesed through ClassName not ObjectName */
         switch (lliurexUpIndicator.status){
-            case LliurexUpIndicator.NeedsAttentionStatus:
-                plasmoid.removeAction("llx-up")
-                return PlasmaCore.Types.NeedsAttentionStatus
             case LliurexUpIndicator.ActiveStatus:
-                plasmoid.setAction("llxup", i18n("Update the system"), "update-low")
+                if (Plasmoid.icon=="lliurexupnotifier-running"){
+                    plasmoid.removeAction("llx-up")
+                }else{
+                    plasmoid.setAction("llxup", i18n("Update the system"), "update-low")
+                }
                 return PlasmaCore.Types.ActiveStatus
             case LliurexUpIndicator.PassiveStatus:
                 return PlasmaCore.Types.PassiveStatus
@@ -42,7 +43,6 @@ Item {
 
     Component.onCompleted: {
         plasmoid.removeAction("configure");
-        /*plasmoid.setAction("llxup", i18n("Update the system"), "update-low"); */
     }
 
     Plasmoid.preferredRepresentation: Plasmoid.compactRepresentation
