@@ -35,6 +35,7 @@
 #include <variant.hpp>
 #include <n4d.hpp>
 #include <variant.hpp>
+#include <thread>
 
 using namespace edupals;
 using namespace std;
