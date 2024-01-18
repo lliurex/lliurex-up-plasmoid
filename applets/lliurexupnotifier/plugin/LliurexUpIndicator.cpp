@@ -40,6 +40,7 @@ LliurexUpIndicator::LliurexUpIndicator(QObject *parent)
 {
     
     TARGET_FILE.setFileName("/var/run/lliurexUp.lock");
+    DISABLE_WIDGET_TOKEN.setFileName("/etc/lliurex-up-indicator/disableIndicator.token");
    
     plasmoidMode();
 
@@ -127,17 +128,19 @@ void LliurexUpIndicator::worker(){
         if (LliurexUpIndicator::TARGET_FILE.exists() ) {
             isAlive();
         }else{
-            if (updatedInfo){
-                if (!remoteUpdateInfo){
-                    lastUpdate=lastUpdate+1200;
-                    if (lastUpdate==FREQUENCY){
-                        lastUpdate=0;
-                        updateCache();
-
-                    }else{
-                        if (m_utils->isCacheUpdated()){
+            if (!LliurexUpIndicator::DISABLE_WIDGET_TOKEN.exists()) {
+                if (updatedInfo){
+                    if (!remoteUpdateInfo){
+                        lastUpdate=lastUpdate+1200;
+                        if (lastUpdate==FREQUENCY){
                             lastUpdate=0;
                             updateCache();
+
+                        }else{
+                            if (m_utils->isCacheUpdated()){
+                                lastUpdate=0;
+                                updateCache();
+                            }
                         }
                     }
                 }
