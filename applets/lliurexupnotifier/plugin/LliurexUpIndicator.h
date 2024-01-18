@@ -101,6 +101,7 @@ private:
     QString m_toolTip;
     QString m_subToolTip;
     QFile TARGET_FILE;
+    QFile DISABLE_WIDGET_TOKEN;
     int FREQUENCY=3600;
     bool updatedInfo=false;
     bool remoteUpdateInfo=false;
