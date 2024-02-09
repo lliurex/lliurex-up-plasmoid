@@ -1,3 +1,9 @@
+lliurex-up-indicator (24.05.1) jammy; urgency=medium
+
+  * Added aptdaemon as depend
+  
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Fri, 09 Feb 2024 10:55:22 +0100
+
 lliurex-up-indicator (24.05) jammy; urgency=medium
 
   * Migrated to plasmoid
