@@ -37,6 +37,7 @@ Depends: kpackagetool5,
          qml-module-qtquick-window2,
          qml-module-qtwebengine,
          qml-module-qtwebkit,
+	 aptdaemon,
          ${misc:Depends},
          ${shlibs:Depends}
 Description: additional widgets for Plasma 5
