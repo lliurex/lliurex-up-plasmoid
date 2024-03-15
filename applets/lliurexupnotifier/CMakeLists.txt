@@ -36,6 +36,8 @@ install(FILES "icons/lliurexupnotifier.svg"
         DESTINATION ${DATAROOTDIR}/usr/share/icons/hicolor/scalable/apps/)
 install(FILES "icons/lliurexupnotifier-running.svg"
         DESTINATION ${DATAROOTDIR}/usr/share/icons/hicolor/scalable/apps/)
+install(FILES "icons/lliurexupnotifier-autoupdate.svg"
+        DESTINATION ${DATAROOTDIR}/usr/share/icons/hicolor/scalable/apps/)
 install(FILES "knotifications5/llxupnotifier.notifyrc"
         DESTINATION ${DATAROOTDIR}/usr/share/knotifications5/)        
 #install(FILES "autostart/lliurex-up-indicator"

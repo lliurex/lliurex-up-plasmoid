@@ -36,6 +36,8 @@
 #include <n4d.hpp>
 #include <variant.hpp>
 #include <thread>
+#include <iostream>
+#include <string>
 
 using namespace edupals;
 using namespace std;
@@ -45,6 +47,8 @@ LliurexUpIndicatorUtils::LliurexUpIndicatorUtils(QObject *parent)
        
 {
     PKGCACHE.setFileName("/var/cache/apt/pkgcache.bin");
+    AUTO_UPDATE_TOKEN.setFileName("/var/run/lliurex-up-auto.token");
+
   
 }    
 
@@ -314,3 +318,27 @@ bool LliurexUpIndicatorUtils::isConnectionWithServer(){
      
 }
 
+bool LliurexUpIndicatorUtils::isAutoUpgradeReady(){
+
+    if (AUTO_UPDATE_TOKEN.exists()){
+        return true;
+    }else{
+        return false;
+    }
+
+}
+
+QString LliurexUpIndicatorUtils::getAutoUpgradeTime(){
+
+    QString result;
+    if (LliurexUpIndicatorUtils::isAutoUpgradeReady()){
+        if (AUTO_UPDATE_TOKEN.open(QIODevice::ReadOnly)){
+            QTextStream content(&AUTO_UPDATE_TOKEN);
+            result=content.readLine();
+        }
+
+    }
+    qDebug()<<"AUTO-UPGRADE TIME";
+    qDebug()<<result;
+    return result;
+}

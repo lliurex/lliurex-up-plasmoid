@@ -40,7 +40,6 @@ LliurexUpIndicator::LliurexUpIndicator(QObject *parent)
 {
     
     TARGET_FILE.setFileName("/var/run/lliurexUp.lock");
-    DISABLE_WIDGET_TOKEN.setFileName("/etc/lliurex-up-indicator/disableIndicator.token");
    
     plasmoidMode();
 
@@ -128,19 +127,17 @@ void LliurexUpIndicator::worker(){
         if (LliurexUpIndicator::TARGET_FILE.exists() ) {
             isAlive();
         }else{
-            if (!LliurexUpIndicator::DISABLE_WIDGET_TOKEN.exists()) {
-                if (updatedInfo){
-                    if (!remoteUpdateInfo){
-                        lastUpdate=lastUpdate+1200;
-                        if (lastUpdate==FREQUENCY){
+            if (updatedInfo){
+                if (!remoteUpdateInfo){
+                    lastUpdate=lastUpdate+1200;
+                    if (lastUpdate==FREQUENCY){
+                        lastUpdate=0;
+                        updateCache();
+
+                    }else{
+                        if (m_utils->isCacheUpdated()){
                             lastUpdate=0;
                             updateCache();
-
-                        }else{
-                            if (m_utils->isCacheUpdated()){
-                                lastUpdate=0;
-                                updateCache();
-                            }
                         }
                     }
                 }
@@ -220,30 +217,43 @@ LliurexUpIndicator::TrayStatus LliurexUpIndicator::status() const
 void LliurexUpIndicator::changeTryIconState(int state){
 
     const QString tooltip(i18n("Lliurex-Up"));
+    QString notificationTitle;
+    QString notificationBody;
+    QString notificationIcon;
+
     if (state==0){
-        setStatus(ActiveStatus);
         const QString subtooltip(i18n("There are new packages ready to be updated or installed"));
+        setStatus(ActiveStatus);
+        if (m_utils->isAutoUpgradeReady()){
+            setIconName("lliurexupnotifier-autoupdate");
+            QString timeToUpdate=m_utils->getAutoUpgradeTime();
+            notificationBody=i18n("The system will be update automatically at: ")+timeToUpdate;
+            notificationIcon="lliurexupnotifier-autoupdate";
+        }else{
+            setIconName("lliurexupnotifier");
+            notificationIcon="lliurexupnotifier";
+        }
         setToolTip(tooltip);
-        setSubToolTip(subtooltip);
-        setIconName("lliurexupnotifier");
-        m_updatesAvailableNotification = KNotification::event(QStringLiteral("Update"), subtooltip, {}, "lliurex-up-indicator", nullptr, KNotification::CloseOnTimeout , QStringLiteral("llxupnotifier"));
+        setSubToolTip(subtooltip+"\n"+notificationBody);
+        m_updatesAvailableNotification = KNotification::event(QStringLiteral("Update"), subtooltip, notificationBody, notificationIcon, nullptr, KNotification::CloseOnTimeout , QStringLiteral("llxupnotifier"));
         const QString name = i18n("Update now");
         m_updatesAvailableNotification->setDefaultAction(name);
         m_updatesAvailableNotification->setActions({name});
         connect(m_updatesAvailableNotification, QOverload<unsigned int>::of(&KNotification::activated), this, &LliurexUpIndicator::launch_llxup);
 
-
     }else if (state==2){
         setStatus(ActiveStatus);
-        const QString title(i18n("Lliurex-Up is being run remotely or automatically"));
-        const QString body(i18n("Do not turn-off or restart your computer"));
-        const QString subtooltip=title+"\n"+body;
+        notificationTitle=i18n("Lliurex-Up is being run remotely or automatically");
+        notificationBody=i18n("Do not turn-off or restart your computer");
+        const QString subtooltip=notificationTitle+"\n"+notificationBody;
         setToolTip(tooltip);
         setSubToolTip(subtooltip);
         setIconName("lliurexupnotifier-running");
-        m_remoteUpdateNotification = KNotification::event(QStringLiteral("remoteUpdate"), title,body, "lliurex-up-indicator", nullptr, KNotification::CloseOnTimeout , QStringLiteral("llxupnotifier"));
+        notificationIcon="lliurexupnotifier-running";
+        m_remoteUpdateNotification = KNotification::event(QStringLiteral("remoteUpdate"), notificationTitle,notificationBody, notificationIcon, nullptr, KNotification::Persistent , QStringLiteral("llxupnotifier"));
 
     }else{
+        if (m_remoteUpdateNotification) { m_remoteUpdateNotification->close(); }
         setStatus(PassiveStatus);
     }
     

@@ -39,10 +39,14 @@ public:
 
     QStringList getFlavours();
     QStringList getUserGroups();
+    QFile AUTO_UPDATE_TOKEN;
+
     bool runUpdateCache();
     bool checkRemote();
     bool isCacheUpdated();
     bool isConnectionWithServer();
+    bool isAutoUpgradeReady();
+    QString getAutoUpgradeTime();
 
     bool cacheUpdated=true;
 
