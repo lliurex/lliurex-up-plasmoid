@@ -230,7 +230,7 @@ void LliurexUpIndicator::changeTryIconState(int state){
         if (m_utils->isAutoUpgradeReady()){
             setIconName("lliurexupnotifier-autoupdate");
             QString timeToUpdate=m_utils->getAutoUpgradeTime();
-            notificationBody=i18n("The system will be update automatically at: ")+timeToUpdate;
+            notificationBody=i18n("The system will be update automatically at")+" "+timeToUpdate;
             notificationIcon="lliurexupnotifier-autoupdate";
         }else{
             setIconName("lliurexupnotifier");
