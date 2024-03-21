@@ -28,6 +28,8 @@
 #include <QFile>
 #include <QThread>
 #include <QFileSystemWatcher>
+#include <QDate>
+#include <QTime>
 
 
 LliurexUpIndicator::LliurexUpIndicator(QObject *parent)
@@ -41,7 +43,9 @@ LliurexUpIndicator::LliurexUpIndicator(QObject *parent)
     
     TARGET_FILE.setFileName("/var/run/lliurexUp.lock");
     DISABLE_WIDGET_TOKEN.setFileName("/etc/lliurex-up-indicator/disableIndicator.token");
-   
+    
+    QString initTitle=i18n("No updates availables");
+    setSubToolTip(initTitle);
     plasmoidMode();
 
     connect(m_timer, &QTimer::timeout, this, &LliurexUpIndicator::worker);
@@ -220,13 +224,16 @@ LliurexUpIndicator::TrayStatus LliurexUpIndicator::status() const
 void LliurexUpIndicator::changeTryIconState(int state){
 
     const QString tooltip(i18n("Lliurex-Up"));
+    QString notificationIcon;
+
     if (state==0){
         setStatus(ActiveStatus);
         const QString subtooltip(i18n("There are new packages ready to be updated or installed"));
         setToolTip(tooltip);
         setSubToolTip(subtooltip);
-        setIconName("lliurexupnotifier");
-        m_updatesAvailableNotification = KNotification::event(QStringLiteral("Update"), subtooltip, {}, "lliurex-up-indicator", nullptr, KNotification::CloseOnTimeout , QStringLiteral("llxupnotifier"));
+        notificationIcon="lliurexupnotifier";
+        setIconName(notificationIcon);
+        m_updatesAvailableNotification = KNotification::event(QStringLiteral("Update"), subtooltip, {}, notificationIcon, nullptr, KNotification::CloseOnTimeout , QStringLiteral("llxupnotifier"));
         const QString name = i18n("Update now");
         m_updatesAvailableNotification->setDefaultAction(name);
         m_updatesAvailableNotification->setActions({name});
@@ -240,11 +247,19 @@ void LliurexUpIndicator::changeTryIconState(int state){
         const QString subtooltip=title+"\n"+body;
         setToolTip(tooltip);
         setSubToolTip(subtooltip);
-        setIconName("lliurexupnotifier-running");
-        m_remoteUpdateNotification = KNotification::event(QStringLiteral("remoteUpdate"), title,body, "lliurex-up-indicator", nullptr, KNotification::CloseOnTimeout , QStringLiteral("llxupnotifier"));
+        notificationIcon="lliurexupnotifier-running";
+        setIconName(notificationIcon);
+        m_remoteUpdateNotification = KNotification::event(QStringLiteral("remoteUpdate"), title,body, notificationIcon, nullptr, KNotification::Persistent , QStringLiteral("llxupnotifier"));
 
     }else{
         setStatus(PassiveStatus);
+        QDate currentDate=QDate::currentDate();
+        QString lastDay=currentDate.toString(Qt::ISODate);
+        QTime currentTime=QTime::currentTime();
+        QString lastTime=currentTime.toString(Qt::ISODate);
+        QString endTitle=i18n("Last execution: ")+lastDay+" "+lastTime;
+        setSubToolTip(endTitle);
+        if (m_remoteUpdateNotification) { m_remoteUpdateNotification->close(); }
     }
     
 }
