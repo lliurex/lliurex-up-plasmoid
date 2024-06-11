@@ -22,7 +22,11 @@
 #include <QProcess>
 #include <QDBusConnection>
 #include <QFile>
+#include <n4d.hpp>
+#include <variant.hpp>
 
+using namespace std;
+using namespace edupals;
 
 class QTimer;
 
@@ -40,20 +44,25 @@ public:
     QStringList getFlavours();
     QStringList getUserGroups();
     QFile AUTO_UPDATE_TOKEN;
+    QFile AUTO_UPDATE_RUN_TOKEN;
 
     bool runUpdateCache();
     bool checkRemote();
     bool isCacheUpdated();
     bool isConnectionWithServer();
-    bool isAutoUpgradeReady();
-    QString getAutoUpgradeTime();
+    bool isAutoUpdateReady();
+    bool isAutoUpdateRun();
+    QString getAutoUpdateTime();
 
     bool cacheUpdated=true;
+
+    void stop_auto_update();
 
 private:    
     
     QFile PKGCACHE;
     qint64 APT_FRECUENCY=1200000;
+    n4d::Client client;
      
 };
 

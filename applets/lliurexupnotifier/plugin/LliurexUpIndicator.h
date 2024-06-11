@@ -43,6 +43,8 @@ class LliurexUpIndicator : public QObject
     Q_PROPERTY(QString toolTip READ toolTip NOTIFY toolTipChanged)
     Q_PROPERTY(QString subToolTip READ subToolTip NOTIFY subToolTipChanged)
     Q_PROPERTY(QString iconName READ iconName NOTIFY iconNameChanged)
+    Q_PROPERTY(bool canLaunchLlxUp READ canLaunchLlxUp NOTIFY canLaunchLlxUpChanged)
+    Q_PROPERTY(bool canStopAutoUpdate READ canStopAutoUpdate NOTIFY canStopAutoUpdateChanged)
     Q_ENUMS(TrayStatus)
 
 public:
@@ -70,6 +72,12 @@ public:
     QString iconName() const;
     void setIconName(const QString &name);
 
+    bool canLaunchLlxUp();
+    void setCanLaunchLlxUp(bool);
+
+    bool canStopAutoUpdate();
+    void setCanStopAutoUpdate(bool);
+
     bool runUpdateCache();
     void isAlive();
 
@@ -81,6 +89,7 @@ public slots:
     void isLliurexUpRunning();
     void checkLlxUp();
     void launch_llxup();
+    void stop_auto_update();
 
 signals:
    
@@ -88,6 +97,8 @@ signals:
     void toolTipChanged();
     void subToolTipChanged();
     void iconNameChanged();
+    void canLaunchLlxUpChanged();
+    void canStopAutoUpdateChanged();
 
 private:
 
@@ -100,6 +111,8 @@ private:
     QString m_iconName = QStringLiteral("lliurexupnotifier");
     QString m_toolTip;
     QString m_subToolTip;
+    bool m_canLaunchLlxUp=true;
+    bool m_canStopAutoUpdate=false;
     QFile TARGET_FILE;
     QFile DISABLE_WIDGET_TOKEN;
     int FREQUENCY=3600;

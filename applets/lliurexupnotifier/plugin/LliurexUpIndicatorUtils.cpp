@@ -33,11 +33,7 @@
 #include <pwd.h>
 #include <n4d.hpp>
 #include <variant.hpp>
-#include <n4d.hpp>
-#include <variant.hpp>
 #include <thread>
-#include <iostream>
-#include <string>
 
 using namespace edupals;
 using namespace std;
@@ -46,8 +42,12 @@ LliurexUpIndicatorUtils::LliurexUpIndicatorUtils(QObject *parent)
     : QObject(parent)
        
 {
+    n4d::Client client;
+    client=n4d::Client("https://server:9779");
+
     PKGCACHE.setFileName("/var/cache/apt/pkgcache.bin");
     AUTO_UPDATE_TOKEN.setFileName("/var/run/lliurex-up-auto.token");
+    AUTO_UPDATE_RUN_TOKEN.setFileName("/var/run/lliurex-up-auto.lock");
 
   
 }    
@@ -305,9 +305,6 @@ bool LliurexUpIndicatorUtils::isCacheUpdated(){
 
 bool LliurexUpIndicatorUtils::isConnectionWithServer(){
 
-    n4d::Client client;
-
-    client=n4d::Client("https://server:9779");
     try{
         variant::Variant test=client.call("MirrorManager","is_alive");
         return true;
@@ -318,27 +315,47 @@ bool LliurexUpIndicatorUtils::isConnectionWithServer(){
      
 }
 
-bool LliurexUpIndicatorUtils::isAutoUpgradeReady(){
+bool LliurexUpIndicatorUtils::isAutoUpdateReady(){
 
     if (AUTO_UPDATE_TOKEN.exists()){
         return true;
     }else{
         return false;
     }
-
+   
 }
 
-QString LliurexUpIndicatorUtils::getAutoUpgradeTime(){
+bool LliurexUpIndicatorUtils::isAutoUpdateRun(){
+    
+    if (AUTO_UPDATE_RUN_TOKEN.exists()){
+        return true;
+    }else{
+        return false;
+    }
+}
+
+QString LliurexUpIndicatorUtils::getAutoUpdateTime(){
 
     QString result;
-    if (LliurexUpIndicatorUtils::isAutoUpgradeReady()){
+    if (LliurexUpIndicatorUtils::isAutoUpdateReady()){
         if (AUTO_UPDATE_TOKEN.open(QIODevice::ReadOnly)){
             QTextStream content(&AUTO_UPDATE_TOKEN);
             result=content.readLine();
+            AUTO_UPDATE_TOKEN.close();
         }
 
     }
-    qDebug()<<"AUTO-UPGRADE TIME";
-    qDebug()<<result;
     return result;
+}
+
+void LliurexUpIndicatorUtils::stop_auto_update(){
+
+    try{
+        if (!AUTO_UPDATE_RUN_TOKEN.exists()){
+            client.call("LliurexUpManager","stop_auto_update_service");
+        }
+    }catch(...){
+        
+    }
+    
 }

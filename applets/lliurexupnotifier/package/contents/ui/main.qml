@@ -1,8 +1,9 @@
 import QtQuick 2.15
 import QtQuick.Layouts 1.15
-import org.kde.plasma.core 2.0 as PlasmaCore
+
 import org.kde.plasma.plasmoid 2.0
-import org.kde.plasma.components 2.0 as Components
+import org.kde.plasma.core 2.1 as PlasmaCore
+import org.kde.plasma.components 3.0 as PlasmaComponents3
 import org.kde.plasma.extras 2.0 as PlasmaExtras
 
 import org.kde.plasma.private.lliurexupnotifier 1.0
@@ -16,17 +17,27 @@ Item {
 
     }
 
+    function populateContextualActions() {
+        plasmoid.clearActions()
+
+        plasmoid.setAction("runLliurexUp", i18n("Update the system"), "lliurex-up")
+        plasmoid.action("runLliurexUp").enabled = lliurexUpIndicator.canLaunchLlxUp
+        plasmoid.action("runLliurexUp").visible = lliurexUpIndicator.canLaunchLlxUp
+
+        plasmoid.setAction("stopAutoUpdate", i18n("Stop automatic update"),"media-playback-stop")
+        plasmoid.action("stopAutoUpdate").enabled = lliurexUpIndicator.canStopAutoUpdate
+        plasmoid.action("stopAutoUpdate").visible = lliurexUpIndicator.canStopAutoUpdate
+        
+    }
+
     Plasmoid.status: {
         /* Warn! Enum types are accesed through ClassName not ObjectName */
         switch (lliurexUpIndicator.status){
             case LliurexUpIndicator.ActiveStatus:
-                if (Plasmoid.icon=="lliurexupnotifier-running"){
-                    plasmoid.removeAction("llx-up")
-                }else{
-                    plasmoid.setAction("llxup", i18n("Update the system"), "update-low")
-                }
+                populateContextualActions()
                 return PlasmaCore.Types.ActiveStatus
             case LliurexUpIndicator.PassiveStatus:
+                populateContextualActions()
                 return PlasmaCore.Types.PassiveStatus
         }
         
@@ -43,22 +54,31 @@ Item {
 
     Component.onCompleted: {
         plasmoid.removeAction("configure");
+        populateContextualActions();
     }
 
-    Plasmoid.preferredRepresentation: Plasmoid.compactRepresentation
-    Plasmoid.compactRepresentation: PlasmaCore.IconItem {
-        source: plasmoid.icon
-        MouseArea {
-            anchors.fill: parent
+    Plasmoid.preferredRepresentation: Plasmoid.fullRepresentation
+   
+    Plasmoid.fullRepresentation: PlasmaComponents3.Page {
+        implicitWidth: PlasmaCore.Units.gridUnit * 12
+        implicitHeight: PlasmaCore.Units.gridUnit * 6
+
+        PlasmaExtras.PlaceholderMessage {
+            anchors.centerIn: parent
+            width: parent.width - (PlasmaCore.Units.gridUnit * 4)
+            iconName: Plasmoid.icon
+            text:Plasmoid.toolTipSubText
         }
     }
 
-    Plasmoid.onExpandedChanged: if (Plasmoid.expanded) {
-        action_llxup()
+
+ 
+    function action_runLliurexUp() {
+        lliurexUpIndicator.launch_llxup()
     }
 
-    function action_llxup() {
-        lliurexUpIndicator.launch_llxup()
+    function action_stopAutoUpdate() {
+        lliurexUpIndicator.stop_auto_update()
     }
 
  }	
