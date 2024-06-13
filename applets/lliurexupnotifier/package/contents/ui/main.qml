@@ -24,7 +24,7 @@ Item {
         plasmoid.action("runLliurexUp").enabled = lliurexUpIndicator.canLaunchLlxUp
         plasmoid.action("runLliurexUp").visible = lliurexUpIndicator.canLaunchLlxUp
 
-        plasmoid.setAction("stopAutoUpdate", i18n("Stop automatic update"),"media-playback-stop")
+        plasmoid.setAction("stopAutoUpdate", i18n("Cancel automatic update"),"media-playback-stop")
         plasmoid.action("stopAutoUpdate").enabled = lliurexUpIndicator.canStopAutoUpdate
         plasmoid.action("stopAutoUpdate").visible = lliurexUpIndicator.canStopAutoUpdate
         

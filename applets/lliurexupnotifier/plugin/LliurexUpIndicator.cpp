@@ -249,11 +249,21 @@ void LliurexUpIndicator::changeTryIconState(int state){
         }
         setToolTip(tooltip);
         setSubToolTip(subtooltip+"\n"+notificationBody);
-        m_updatesAvailableNotification = KNotification::event(QStringLiteral("Update"), subtooltip, notificationBody, notificationIcon, nullptr, KNotification::CloseOnTimeout , QStringLiteral("llxupnotifier"));
-        const QString name = i18n("Update now");
-        m_updatesAvailableNotification->setDefaultAction(name);
-        m_updatesAvailableNotification->setActions({name});
-        connect(m_updatesAvailableNotification, QOverload<unsigned int>::of(&KNotification::activated), this, &LliurexUpIndicator::launch_llxup);
+        if (!m_canStopAutoUpdate){
+            m_updatesAvailableNotification = KNotification::event(QStringLiteral("Update"), subtooltip, notificationBody, notificationIcon, nullptr, KNotification::CloseOnTimeout , QStringLiteral("llxupnotifier"));
+            const QString name = i18n("Update now");
+            m_updatesAvailableNotification->setDefaultAction(name);
+            m_updatesAvailableNotification->setActions({name});
+            connect(m_updatesAvailableNotification, QOverload<unsigned int>::of(&KNotification::activated), this, &LliurexUpIndicator::launch_llxup);
+
+        }else{
+            m_updatesAvailableNotification = KNotification::event(QStringLiteral("Update"), subtooltip, notificationBody, notificationIcon, nullptr, KNotification::Persistent , QStringLiteral("llxupnotifier"));
+            const QString name=i18n("Cancel automatic update");
+            m_updatesAvailableNotification->setDefaultAction(name);
+            m_updatesAvailableNotification->setActions({name});
+            connect(m_updatesAvailableNotification, QOverload<unsigned int>::of(&KNotification::activated), this, &LliurexUpIndicator::stop_auto_update);
+
+        }
 
 
     }else if (state==2){
@@ -301,6 +311,7 @@ void LliurexUpIndicator::stop_auto_update()
 {
 
     m_utils->stop_auto_update();
+    if (m_updatesAvailableNotification) { m_updatesAvailableNotification->close(); }
     changeTryIconState(0);
 
 }
