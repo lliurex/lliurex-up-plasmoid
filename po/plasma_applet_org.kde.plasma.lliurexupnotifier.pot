@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lliurexupnotifier \n"
 "Report-Msgid-Bugs-To: http://lliurex.net\n"
-"POT-Creation-Date: 2024-06-13 11:22+0200\n"
+"POT-Creation-Date: 2024-06-14 12:21+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,7 +22,7 @@ msgstr ""
 msgid "Update the system"
 msgstr ""
 
-#: ../applets/lliurexupnotifier/package/contents/ui/main.qml:27 ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:261
+#: ../applets/lliurexupnotifier/package/contents/ui/main.qml:27
 #, kde-format
 msgid "Cancel automatic update"
 msgstr ""
@@ -47,22 +47,22 @@ msgstr ""
 msgid "The system will be update automatically at"
 msgstr ""
 
-#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:254
+#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:253
 #, kde-format
 msgid "Update now"
 msgstr ""
 
-#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:273
+#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:262
 #, kde-format
 msgid "Lliurex-Up is being run remotely or automatically"
 msgstr ""
 
-#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:274
+#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:263
 #, kde-format
 msgid "Do not turn-off or restart your computer"
 msgstr ""
 
-#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:290
+#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:279
 #, kde-format
 msgid "Last execution: "
 msgstr ""

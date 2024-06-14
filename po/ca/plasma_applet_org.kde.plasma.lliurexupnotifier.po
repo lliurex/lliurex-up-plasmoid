@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "Report-Msgid-Bugs-To: http://lliurex.net\n"
-"POT-Creation-Date: 2024-06-13 11:22+0200\n"
-"PO-Revision-Date: 2024-06-13 11:27+0200\n"
+"POT-Creation-Date: 2024-06-14 12:21+0200\n"
+"PO-Revision-Date: 2024-06-14 12:22+0200\n"
 "Last-Translator: lliurex <lliurex@lliurex.net>\n"
 "Language-Team: Catalan <kde-i18n-ca@kde.org>\n"
 "Language: es\n"
@@ -23,7 +23,6 @@ msgid "Update the system"
 msgstr "Actualitza el sistema"
 
 #: ../applets/lliurexupnotifier/package/contents/ui/main.qml:27
-#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:261
 #, kde-format
 msgid "Cancel automatic update"
 msgstr "Cancel·la l'actualització automàtica"
@@ -48,22 +47,22 @@ msgstr "Hi ha nous paquets preparats per a actualitzar-los i/o instal·lar-los"
 msgid "The system will be update automatically at"
 msgstr "El sistema serà actualitzat a les"
 
-#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:254
+#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:253
 #, kde-format
 msgid "Update now"
 msgstr "Actualitza el sistema ara"
 
-#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:273
+#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:262
 #, kde-format
 msgid "Lliurex-Up is being run remotely or automatically"
 msgstr "S'està executant el LliureX Up de manera remota o automàticament"
 
-#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:274
+#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:263
 #, kde-format
 msgid "Do not turn-off or restart your computer"
 msgstr "No apagueu o reinicieu l'equip"
 
-#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:290
+#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:279
 #, kde-format
 msgid "Last execution: "
 msgstr "Última execució: "
