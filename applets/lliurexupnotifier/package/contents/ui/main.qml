@@ -17,19 +17,6 @@ Item {
 
     }
 
-    function populateContextualActions() {
-        plasmoid.clearActions()
-
-        plasmoid.setAction("runLliurexUp", i18n("Update the system"), "lliurex-up")
-        plasmoid.action("runLliurexUp").enabled = lliurexUpIndicator.canLaunchLlxUp
-        plasmoid.action("runLliurexUp").visible = lliurexUpIndicator.canLaunchLlxUp
-
-        plasmoid.setAction("stopAutoUpdate", i18n("Cancel automatic update"),"media-playback-stop")
-        plasmoid.action("stopAutoUpdate").enabled = lliurexUpIndicator.canStopAutoUpdate
-        plasmoid.action("stopAutoUpdate").visible = lliurexUpIndicator.canStopAutoUpdate
-        
-    }
-
     Plasmoid.status: {
         /* Warn! Enum types are accesed through ClassName not ObjectName */
         switch (lliurexUpIndicator.status){
@@ -73,12 +60,25 @@ Item {
 
 
  
-    function action_runLliurexUp() {
+    function action_llxup() {
         lliurexUpIndicator.launch_llxup()
     }
 
     function action_stopAutoUpdate() {
         lliurexUpIndicator.stop_auto_update()
+    }
+
+    function populateContextualActions() {
+        plasmoid.clearActions()
+
+        plasmoid.setAction("llxup", i18n("Update the system"), "lliurex-up")
+        plasmoid.action("llxup").enabled = lliurexUpIndicator.canLaunchLlxUp
+        plasmoid.action("llxup").visible = lliurexUpIndicator.canLaunchLlxUp
+
+        plasmoid.setAction("stopAutoUpdate", i18n("Cancel automatic update"),"media-playback-stop")
+        plasmoid.action("stopAutoUpdate").enabled = lliurexUpIndicator.canStopAutoUpdate
+        plasmoid.action("stopAutoUpdate").visible = lliurexUpIndicator.canStopAutoUpdate
+        
     }
 
  }	

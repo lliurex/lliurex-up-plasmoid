@@ -44,6 +44,7 @@ LliurexUpIndicator::LliurexUpIndicator(QObject *parent)
     TARGET_FILE.setFileName("/var/run/lliurexUp.lock");
     DISABLE_WIDGET_TOKEN.setFileName("/etc/lliurex-up-indicator/disableIndicator.token");
     
+    m_utils->cleanCache();
     QString initTitle=i18n("No updates availables");
     setSubToolTip(initTitle);
     plasmoidMode();
@@ -301,7 +302,7 @@ void LliurexUpIndicator::stop_auto_update()
 
     m_utils->stop_auto_update();
     if (m_updatesAvailableNotification) { m_updatesAvailableNotification->close(); }
-    changeTryIconState(0);
+    changeTryIconState(1);
 
 }
 
