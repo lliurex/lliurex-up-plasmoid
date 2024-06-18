@@ -372,6 +372,19 @@ bool LliurexUpIndicatorUtils::isConnectionWithServer(){
      
 }
 
+bool LliurexUpIndicatorUtils::canStopAutoUpdate(){
+
+    try{
+        n4d::Client localClient;
+        localClient=n4d::Client("https://localhost:9779");
+        variant::Variant result=localClient.call("LliurexUpManager","can_cancel_auto_upgrade");
+        return result;
+    }catch(...){
+        return false;
+    }
+
+}
+
 bool LliurexUpIndicatorUtils::isAutoUpdateReady(){
 
     if (AUTO_UPDATE_TOKEN.exists()){

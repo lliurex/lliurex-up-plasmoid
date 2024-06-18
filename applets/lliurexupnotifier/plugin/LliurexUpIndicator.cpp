@@ -235,8 +235,12 @@ void LliurexUpIndicator::changeTryIconState(int state){
         setCanLaunchLlxUp(true);
         if (m_utils->isAutoUpdateReady()){
             setIconName("lliurexupnotifier-autoupdate");
-            if (!m_utils->isAutoUpdateRun()){
-                setCanStopAutoUpdate(true);
+            if (m_utils->canStopAutoUpdate()){
+                if (!m_utils->isAutoUpdateRun()){
+                    setCanStopAutoUpdate(true);
+                }else{
+                    setCanStopAutoUpdate(false);
+                }
             }else{
                 setCanStopAutoUpdate(false);
             }
@@ -302,7 +306,7 @@ void LliurexUpIndicator::stop_auto_update()
 
     m_utils->stop_auto_update();
     if (m_updatesAvailableNotification) { m_updatesAvailableNotification->close(); }
-    changeTryIconState(1);
+    changeTryIconState(0);
 
 }
 
