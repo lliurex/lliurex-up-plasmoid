@@ -55,7 +55,7 @@ public:
     bool cacheUpdated=true;
 
     bool canStopAutoUpdate();
-    void stop_auto_update();
+    void stopAutoUpdate();
     void cleanCache();
 
 private:    

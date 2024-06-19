@@ -44,8 +44,8 @@ LliurexUpIndicatorUtils::LliurexUpIndicatorUtils(QObject *parent)
 {
     user=qgetenv("USER");
     PKGCACHE.setFileName("/var/cache/apt/pkgcache.bin");
-    AUTO_UPDATE_TOKEN.setFileName("/var/run/lliurex-up-auto.token");
-    AUTO_UPDATE_RUN_TOKEN.setFileName("/var/run/lliurex-up-auto.lock");
+    AUTO_UPDATE_TOKEN.setFileName("/var/run/lliurex-up-auto-upgrade.token");
+    AUTO_UPDATE_RUN_TOKEN.setFileName("/var/run/lliurex-up-auto-upgrade.lock");
 
 }
 
@@ -418,7 +418,7 @@ QString LliurexUpIndicatorUtils::getAutoUpdateTime(){
     return result;
 }
 
-void LliurexUpIndicatorUtils::stop_auto_update(){
+void LliurexUpIndicatorUtils::stopAutoUpdate(){
 
     try{
         if (!AUTO_UPDATE_RUN_TOKEN.exists()){

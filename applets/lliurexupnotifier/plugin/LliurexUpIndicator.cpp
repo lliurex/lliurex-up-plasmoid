@@ -182,7 +182,7 @@ void LliurexUpIndicator::dbusDone(bool result){
     }
 
     if (result){
-        changeTryIconState(0);
+        changeTryIconState(0,true);
     }
 
 }    
@@ -193,9 +193,9 @@ void LliurexUpIndicator::isAlive(){
     remoteUpdateInfo=true;
 
     if (m_utils->checkRemote()){
-        changeTryIconState(2);
+        changeTryIconState(2,true);
     }else{
-        changeTryIconState(1);
+        changeTryIconState(1,false);
     }
 
     connect(m_timer_run, &QTimer::timeout, this, &LliurexUpIndicator::checkLlxUp);
@@ -211,7 +211,7 @@ void LliurexUpIndicator::checkLlxUp(){
         m_timer_run->stop();
         isWorking=false;
         remoteUpdateInfo=false;
-        changeTryIconState(1);
+        changeTryIconState(1,false);
           
     } 
 
@@ -222,7 +222,7 @@ LliurexUpIndicator::TrayStatus LliurexUpIndicator::status() const
     return m_status;
 }
 
-void LliurexUpIndicator::changeTryIconState(int state){
+void LliurexUpIndicator::changeTryIconState(int state,bool showNotification=true){
 
     const QString tooltip(i18n("Lliurex-Up"));
     QString notificationTitle;
@@ -254,12 +254,13 @@ void LliurexUpIndicator::changeTryIconState(int state){
         }
         setToolTip(tooltip);
         setSubToolTip(subtooltip+"\n"+notificationBody);
-        m_updatesAvailableNotification = KNotification::event(QStringLiteral("Update"), subtooltip, notificationBody, notificationIcon, nullptr, KNotification::CloseOnTimeout , QStringLiteral("llxupnotifier"));
-        const QString name = i18n("Update now");
-        m_updatesAvailableNotification->setDefaultAction(name);
-        m_updatesAvailableNotification->setActions({name});
-        connect(m_updatesAvailableNotification, QOverload<unsigned int>::of(&KNotification::activated), this, &LliurexUpIndicator::launch_llxup);
-
+        if (showNotification){
+            m_updatesAvailableNotification = KNotification::event(QStringLiteral("Update"), subtooltip, notificationBody, notificationIcon, nullptr, KNotification::CloseOnTimeout , QStringLiteral("llxupnotifier"));
+            const QString name = i18n("Update now");
+            m_updatesAvailableNotification->setDefaultAction(name);
+            m_updatesAvailableNotification->setActions({name});
+            connect(m_updatesAvailableNotification, QOverload<unsigned int>::of(&KNotification::activated), this, &LliurexUpIndicator::launchLlxup);
+        }
     }else if (state==2){
         setStatus(ActiveStatus);
         setCanLaunchLlxUp(false);
@@ -273,7 +274,7 @@ void LliurexUpIndicator::changeTryIconState(int state){
         notificationIcon="lliurexupnotifier-running";
         m_remoteUpdateNotification = KNotification::event(QStringLiteral("remoteUpdate"), notificationTitle,notificationBody, notificationIcon, nullptr, KNotification::Persistent , QStringLiteral("llxupnotifier"));
 
-    }else{
+    }else {
         setStatus(PassiveStatus);
         setCanLaunchLlxUp(false);
         setCanStopAutoUpdate(false);
@@ -289,7 +290,7 @@ void LliurexUpIndicator::changeTryIconState(int state){
     
 }
 
-void LliurexUpIndicator::launch_llxup()
+void LliurexUpIndicator::launchLlxup()
 {
     if (m_status==0){
         KIO::CommandLauncherJob *job = nullptr;
@@ -301,12 +302,12 @@ void LliurexUpIndicator::launch_llxup()
    
 }
 
-void LliurexUpIndicator::stop_auto_update()
+void LliurexUpIndicator::cancelAutoUpdate()
 {
 
-    m_utils->stop_auto_update();
+    m_utils->stopAutoUpdate();
     if (m_updatesAvailableNotification) { m_updatesAvailableNotification->close(); }
-    changeTryIconState(0);
+    changeTryIconState(0,false);
 
 }
 

@@ -60,7 +60,7 @@ public:
     LliurexUpIndicator(QObject *parent = nullptr);
 
     TrayStatus status() const;
-    void changeTryIconState (int state);
+    void changeTryIconState (int state,bool showNotification);
     void setStatus(TrayStatus status);
 
     QString toolTip() const;
@@ -88,8 +88,8 @@ public slots:
     void worker();
     void isLliurexUpRunning();
     void checkLlxUp();
-    void launch_llxup();
-    void stop_auto_update();
+    void launchLlxup();
+    void cancelAutoUpdate();
 
 signals:
    

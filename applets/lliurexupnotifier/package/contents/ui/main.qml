@@ -61,11 +61,11 @@ Item {
 
  
     function action_llxup() {
-        lliurexUpIndicator.launch_llxup()
+        lliurexUpIndicator.launchLlxup()
     }
 
-    function action_stopAutoUpdate() {
-        lliurexUpIndicator.stop_auto_update()
+    function action_cancelAutoUpdate() {
+        lliurexUpIndicator.cancelAutoUpdate()
     }
 
     function populateContextualActions() {
@@ -75,9 +75,9 @@ Item {
         plasmoid.action("llxup").enabled = lliurexUpIndicator.canLaunchLlxUp
         plasmoid.action("llxup").visible = lliurexUpIndicator.canLaunchLlxUp
 
-        plasmoid.setAction("stopAutoUpdate", i18n("Cancel automatic update"),"media-playback-stop")
-        plasmoid.action("stopAutoUpdate").enabled = lliurexUpIndicator.canStopAutoUpdate
-        plasmoid.action("stopAutoUpdate").visible = lliurexUpIndicator.canStopAutoUpdate
+        plasmoid.setAction("cancelAutoUpdate", i18n("Cancel automatic update"),"chronometer-pause.svg")
+        plasmoid.action("cancelAutoUpdate").enabled = lliurexUpIndicator.canStopAutoUpdate
+        plasmoid.action("cancelAutoUpdate").visible = lliurexUpIndicator.canStopAutoUpdate
         
     }
 
