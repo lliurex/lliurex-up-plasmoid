@@ -75,7 +75,7 @@ Item {
         plasmoid.action("llxup").enabled = lliurexUpIndicator.canLaunchLlxUp
         plasmoid.action("llxup").visible = lliurexUpIndicator.canLaunchLlxUp
 
-        plasmoid.setAction("cancelAutoUpdate", i18n("Cancel automatic update"),"chronometer-pause.svg")
+        plasmoid.setAction("cancelAutoUpdate", i18n("Wait until tomorrow"),"chronometer-pause.svg")
         plasmoid.action("cancelAutoUpdate").enabled = lliurexUpIndicator.canStopAutoUpdate
         plasmoid.action("cancelAutoUpdate").visible = lliurexUpIndicator.canStopAutoUpdate
         

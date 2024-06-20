@@ -131,6 +131,7 @@ QStringList LliurexUpIndicatorUtils::getUserGroups(){
     struct passwd *pw;
     struct group *gr;
     QStringList userGroups;
+    isStudent=false;
 
 
     QByteArray uname = user.toLocal8Bit();
@@ -139,11 +140,13 @@ QStringList LliurexUpIndicatorUtils::getUserGroups(){
     getgrouplist(username, pw->pw_gid, groups, &ngroups);
     for (j = 0; j < ngroups; j++) {
         gr = getgrgid(groups[j]);
-        if (gr != NULL)
-        if ((strcmp(gr->gr_name,"adm")==0)||(strcmp(gr->gr_name,"admins")==0)||(strcmp(gr->gr_name,"teachers")==0)){
-            userGroups.append(gr->gr_name);
-        }    
-
+        if (gr != NULL){
+            if ((strcmp(gr->gr_name,"adm")==0)||(strcmp(gr->gr_name,"admins")==0)||(strcmp(gr->gr_name,"teachers")==0)){
+                userGroups.append(gr->gr_name);
+            }else if (strcmp(gr->gr_name,"students")==0){
+                isStudent=true;
+            } 
+        }  
     }
     return userGroups;
 }    

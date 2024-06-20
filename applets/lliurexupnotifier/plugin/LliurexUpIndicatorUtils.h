@@ -54,6 +54,7 @@ public:
 
     bool cacheUpdated=true;
 
+    bool isStudent=false;
     bool canStopAutoUpdate();
     void stopAutoUpdate();
     void cleanCache();
