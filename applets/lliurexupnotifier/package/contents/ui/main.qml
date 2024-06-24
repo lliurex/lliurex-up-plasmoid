@@ -21,13 +21,10 @@ Item {
         /* Warn! Enum types are accesed through ClassName not ObjectName */
         switch (lliurexUpIndicator.status){
             case LliurexUpIndicator.ActiveStatus:
-                if (Plasmoid.icon=="lliurexupnotifier-running"){
-                    plasmoid.removeAction("llx-up")
-                }else{
-                    plasmoid.setAction("llxup", i18n("Update the system"), "lliurex-up")
-                }
+                populateContextualActions()
                 return PlasmaCore.Types.ActiveStatus
             case LliurexUpIndicator.PassiveStatus:
+                populateContextualActions()
                 return PlasmaCore.Types.PassiveStatus
         }
         
@@ -44,6 +41,7 @@ Item {
 
     Component.onCompleted: {
         plasmoid.removeAction("configure");
+        populateContextualActions();
     }
 
     Plasmoid.preferredRepresentation: Plasmoid.fullRepresentation
@@ -60,10 +58,26 @@ Item {
         }
     }
 
-
  
     function action_llxup() {
-        lliurexUpIndicator.launch_llxup()
+        lliurexUpIndicator.launchLlxup()
+    }
+
+    function action_cancelAutoUpdate() {
+        lliurexUpIndicator.cancelAutoUpdate()
+    }
+
+    function populateContextualActions() {
+        plasmoid.clearActions()
+
+        plasmoid.setAction("llxup", i18n("Update the system"), "lliurex-up")
+        plasmoid.action("llxup").enabled = lliurexUpIndicator.canLaunchLlxUp
+        plasmoid.action("llxup").visible = lliurexUpIndicator.canLaunchLlxUp
+
+        plasmoid.setAction("cancelAutoUpdate", i18n("Wait until tomorrow"),"chronometer-pause.svg")
+        plasmoid.action("cancelAutoUpdate").enabled = lliurexUpIndicator.canStopAutoUpdate
+        plasmoid.action("cancelAutoUpdate").visible = lliurexUpIndicator.canStopAutoUpdate
+
     }
 
  }	

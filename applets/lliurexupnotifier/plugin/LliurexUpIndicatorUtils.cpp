@@ -33,8 +33,6 @@
 #include <pwd.h>
 #include <n4d.hpp>
 #include <variant.hpp>
-#include <n4d.hpp>
-#include <variant.hpp>
 #include <thread>
 
 using namespace edupals;
@@ -44,8 +42,70 @@ LliurexUpIndicatorUtils::LliurexUpIndicatorUtils(QObject *parent)
     : QObject(parent)
        
 {
+    user=qgetenv("USER");
     PKGCACHE.setFileName("/var/cache/apt/pkgcache.bin");
-  
+    AUTO_UPDATE_TOKEN.setFileName("/var/run/lliurex-up-auto-upgrade.token");
+    AUTO_UPDATE_RUN_TOKEN.setFileName("/var/run/lliurex-up-auto-upgrade.lock");
+
+}
+
+void LliurexUpIndicatorUtils::cleanCache(){
+
+    QFile CURRENT_VERSION_TOKEN;
+    QDir cacheDir("/home/"+user+"/.cache/plasmashell/qmlcache");
+    QString currentVersion="";
+    bool clear=false;
+
+    CURRENT_VERSION_TOKEN.setFileName("/home/"+user+"/.config/lliurex-up-indicator.conf");
+    QString installedVersion=getInstalledVersion();
+
+    if (!CURRENT_VERSION_TOKEN.exists()){
+        if (CURRENT_VERSION_TOKEN.open(QIODevice::WriteOnly)){
+            QTextStream data(&CURRENT_VERSION_TOKEN);
+            data<<installedVersion;
+            CURRENT_VERSION_TOKEN.close();
+            clear=true;
+        }
+    }else{
+        if (CURRENT_VERSION_TOKEN.open(QIODevice::ReadOnly)){
+            QTextStream content(&CURRENT_VERSION_TOKEN);
+            currentVersion=content.readLine();
+            CURRENT_VERSION_TOKEN.close();
+        }
+
+        if (currentVersion!=installedVersion){
+            if (CURRENT_VERSION_TOKEN.open(QIODevice::WriteOnly)){
+                QTextStream data(&CURRENT_VERSION_TOKEN);
+                data<<installedVersion;
+                CURRENT_VERSION_TOKEN.close();
+                clear=true;
+            }
+        }
+    } 
+    if (clear){
+        if (cacheDir.exists()){
+            cacheDir.removeRecursively();
+        }
+    }   
+
+}
+
+QString LliurexUpIndicatorUtils::getInstalledVersion(){
+
+    QFile INSTALLED_VERSION_TOKEN;
+    QString installedVersion="";
+    
+    INSTALLED_VERSION_TOKEN.setFileName("/var/lib/lliurex-up-indicator/version");
+
+    if (INSTALLED_VERSION_TOKEN.exists()){
+        if (INSTALLED_VERSION_TOKEN.open(QIODevice::ReadOnly)){
+            QTextStream content(&INSTALLED_VERSION_TOKEN);
+            installedVersion=content.readLine();
+            INSTALLED_VERSION_TOKEN.close();
+        }
+    }
+    return installedVersion;
+
 }    
 
 QStringList LliurexUpIndicatorUtils::getFlavours(){
@@ -71,20 +131,22 @@ QStringList LliurexUpIndicatorUtils::getUserGroups(){
     struct passwd *pw;
     struct group *gr;
     QStringList userGroups;
+    isStudent=false;
 
 
-    QString user=qgetenv("USER");
     QByteArray uname = user.toLocal8Bit();
     const char *username = uname.data();
     pw=getpwnam(username);
     getgrouplist(username, pw->pw_gid, groups, &ngroups);
     for (j = 0; j < ngroups; j++) {
         gr = getgrgid(groups[j]);
-        if (gr != NULL)
-        if ((strcmp(gr->gr_name,"adm")==0)||(strcmp(gr->gr_name,"admins")==0)||(strcmp(gr->gr_name,"teachers")==0)){
-            userGroups.append(gr->gr_name);
-        }    
-
+        if (gr != NULL){
+            if ((strcmp(gr->gr_name,"adm")==0)||(strcmp(gr->gr_name,"admins")==0)||(strcmp(gr->gr_name,"teachers")==0)){
+                userGroups.append(gr->gr_name);
+            }else if (strcmp(gr->gr_name,"students")==0){
+                isStudent=true;
+            } 
+        }  
     }
     return userGroups;
 }    
@@ -301,10 +363,9 @@ bool LliurexUpIndicatorUtils::isCacheUpdated(){
 
 bool LliurexUpIndicatorUtils::isConnectionWithServer(){
 
-    n4d::Client client;
-
-    client=n4d::Client("https://server:9779");
     try{
+        n4d::Client client;
+        client=n4d::Client("https://server:9779");
         variant::Variant test=client.call("MirrorManager","is_alive");
         return true;
                
@@ -314,3 +375,62 @@ bool LliurexUpIndicatorUtils::isConnectionWithServer(){
      
 }
 
+bool LliurexUpIndicatorUtils::canStopAutoUpdate(){
+
+    try{
+        n4d::Client localClient;
+        localClient=n4d::Client("https://localhost:9779");
+        variant::Variant result=localClient.call("LliurexUpManager","can_cancel_auto_upgrade");
+        return result;
+    }catch(...){
+        return false;
+    }
+
+}
+
+bool LliurexUpIndicatorUtils::isAutoUpdateReady(){
+
+    if (AUTO_UPDATE_TOKEN.exists()){
+        return true;
+    }else{
+        return false;
+    }
+   
+}
+
+bool LliurexUpIndicatorUtils::isAutoUpdateRun(){
+    
+    if (AUTO_UPDATE_RUN_TOKEN.exists()){
+        return true;
+    }else{
+        return false;
+    }
+}
+
+QString LliurexUpIndicatorUtils::getAutoUpdateTime(){
+
+    QString result;
+    if (LliurexUpIndicatorUtils::isAutoUpdateReady()){
+        if (AUTO_UPDATE_TOKEN.open(QIODevice::ReadOnly)){
+            QTextStream content(&AUTO_UPDATE_TOKEN);
+            result=content.readLine();
+            AUTO_UPDATE_TOKEN.close();
+        }
+
+    }
+    return result;
+}
+
+void LliurexUpIndicatorUtils::stopAutoUpdate(){
+
+    try{
+        if (!AUTO_UPDATE_RUN_TOKEN.exists()){
+            n4d::Client localClient;
+            localClient=n4d::Client("https://localhost:9779");
+            localClient.call("LliurexUpManager","stop_auto_update_service");
+        }
+    }catch(...){
+        
+    }
+    
+}

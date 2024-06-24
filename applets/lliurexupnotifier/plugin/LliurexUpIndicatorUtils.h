@@ -39,17 +39,34 @@ public:
 
     QStringList getFlavours();
     QStringList getUserGroups();
+    QFile AUTO_UPDATE_TOKEN;
+    QFile AUTO_UPDATE_RUN_TOKEN;
+    
+    QString user;
+
     bool runUpdateCache();
     bool checkRemote();
     bool isCacheUpdated();
     bool isConnectionWithServer();
+    bool isAutoUpdateReady();
+    bool isAutoUpdateRun();
+    QString getAutoUpdateTime();
 
     bool cacheUpdated=true;
+
+    bool isStudent=false;
+    bool canStopAutoUpdate();
+    void stopAutoUpdate();
+    void cleanCache();
 
 private:    
     
     QFile PKGCACHE;
     qint64 APT_FRECUENCY=1200000;
+    
+
+    QString getInstalledVersion();
+
      
 };
 
