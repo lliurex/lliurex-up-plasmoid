@@ -1,3 +1,9 @@
+lliurex-up-indicator (24.05.3) jammy; urgency=medium
+
+  * Added support to auto-upgrades
+  
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Tue, 25 Jun 2024 09:19:39 +0200
+
 lliurex-up-indicator (24.05.2) jammy; urgency=medium
 
   * Added full representation in widget
