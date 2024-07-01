@@ -1,3 +1,9 @@
+lliurex-up-indicator-plasmoid (21.05.1) focal; urgency=medium
+
+  * Renamed pkg
+  
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Mon, 01 Jul 2024 09:21:25 +0200
+
 lliurex-up-indicator (21.05) focal; urgency=medium
 
   * Migrated to plasmoid
