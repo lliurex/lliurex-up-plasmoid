@@ -20,7 +20,7 @@ set -e
 
 case "$1" in
     configure)
-        newVersion=$(dpkg-query --showformat='${Version}' --show lliurex-up-indicator)
+        newVersion=$(dpkg-query --showformat='${Version}' --show lliurex-up-indicator-plasmoid)
         tokenDir=/var/lib/lliurex-up-indicator/version
         echo "$newVersion" > "$tokenDir" || true
     ;;

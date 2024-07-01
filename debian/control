@@ -1,4 +1,4 @@
-Source: lliurex-up-indicator
+Source: lliurex-up-indicator-plasmoid
 Section: kde
 Priority: optional
 Maintainer: Equipo LliureX <lliurex@gva.es>
@@ -19,10 +19,10 @@ Build-Depends: cmake (>= 2.8.12),
                kio-dev
 Standards-Version: 3.9.6
 Homepage: http://lliurex.net
-Vcs-Browser: https://svn.lliurex.net/jammy/lliurex-up-plasmoid
+Vcs-Browser: https://svn.lliurex.net/focal/lliurex-up-plasmoid
 Vcs-Git: https://github.com/lliurex/lliurex-up-plasmoid
 
-Package: lliurex-up-indicator
+Package: lliurex-up-indicator-plasmoid
 Architecture: any
 Depends: kpackagetool5,
          libkf5purpose5,

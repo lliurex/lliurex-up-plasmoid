@@ -7,7 +7,7 @@ include /usr/share/pkg-kde-tools/qt-kde-team/2/l10n-packages.mk
 
 override_dh_install:
 	mkdir -p debian/tmp
-	cp -R debian/lliurex-up-indicator/* debian/tmp/
+	cp -R debian/lliurex-up-indicator-plasmoid/* debian/tmp/
 	dh_install
 
 override_dh_auto_test:
