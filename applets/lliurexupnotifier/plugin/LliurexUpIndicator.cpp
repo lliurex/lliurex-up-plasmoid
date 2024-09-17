@@ -261,12 +261,19 @@ void LliurexUpIndicator::changeTryIconState(int state,bool showNotification=true
             notificationIcon="lliurexupnotifier-autoupdate";
             setToolTip(tooltip);
             setSubToolTip(subtooltip+"\n"+notificationBody);
-            m_updatesAvailableNotification = KNotification::event(QStringLiteral("Update"), subtooltip, notificationBody, notificationIcon, nullptr, KNotification::CloseOnTimeout , QStringLiteral("llxupnotifier"));
+            /*auto m_updatesAvailableNotification = new KNotification(QStringLiteral("Update"), subtooltip, notificationBody, notificationIcon, nullptr, KNotification::CloseOnTimeout , QStringLiteral("llxupnotifier"),this);*/
+            m_updatesAvailableNotification = new KNotification(QStringLiteral("Update"), KNotification::CloseOnTimeout,this);
+            m_updatesAvailableNotification->setComponentName(QStringLiteral("llxupnotifier"));
+            m_updatesAvailableNotification->setTitle(subtooltip);
+            m_updatesAvailableNotification->setText(notificationBody);
+            m_updatesAvailableNotification->setIconName(notificationIcon);
             const QString name = i18n("Wait until tomorrow");
             if (showStopOption){
-                m_updatesAvailableNotification->setDefaultAction(name);
-                m_updatesAvailableNotification->setActions({name});
-                connect(m_updatesAvailableNotification, QOverload<unsigned int>::of(&KNotification::activated), this, &LliurexUpIndicator::cancelAutoUpdate);
+                auto cancelUpdateAction=m_updatesAvailableNotification->addAction(name);
+                /*m_updatesAvailableNotification->setActions({name});
+                connect(m_updatesAvailableNotification, QOverload<unsigned int>::of(&KNotification::activated), this, &LliurexUpIndicator::cancelAutoUpdate);*/
+                connect(cancelUpdateAction,&KNotificationAction::activated,this,&LliurexUpIndicator::cancelAutoUpdate);
+                m_updatesAvailableNotification->sendEvent();
             }
         }else{
             if (!m_utils->isStudent){
@@ -278,11 +285,19 @@ void LliurexUpIndicator::changeTryIconState(int state,bool showNotification=true
                 setToolTip(tooltip);
                 setSubToolTip(subtooltip+"\n"+notificationBody);
                 if ((showNotification)&&(rememberUpdate)){
-                    m_updatesAvailableNotification = KNotification::event(QStringLiteral("Update"), subtooltip, notificationBody, notificationIcon, nullptr, KNotification::CloseOnTimeout , QStringLiteral("llxupnotifier"));
+                    /*m_updatesAvailableNotification = KNotification::event(QStringLiteral("Update"), subtooltip, notificationBody, notificationIcon, nullptr, KNotification::CloseOnTimeout , QStringLiteral("llxupnotifier"));*/
+                    m_updatesAvailableNotification = new KNotification(QStringLiteral("Update"), KNotification::CloseOnTimeout,this);
+                    m_updatesAvailableNotification->setComponentName(QStringLiteral("llxupnotifier"));
+                    m_updatesAvailableNotification->setTitle(subtooltip);
+                    m_updatesAvailableNotification->setText(notificationBody);
+                    m_updatesAvailableNotification->setIconName(notificationIcon);
                     const QString name = i18n("Update now");
-                    m_updatesAvailableNotification->setDefaultAction(name);
-                    m_updatesAvailableNotification->setActions({name});
-                    connect(m_updatesAvailableNotification, QOverload<unsigned int>::of(&KNotification::activated), this, &LliurexUpIndicator::launchLlxup);
+                    /*m_updatesAvailableNotification->setDefaultAction(name);
+                    m_updatesAvailableNotification->setActions({name});*/
+                    auto updateAction=m_updatesAvailableNotification->addAction(name);
+                    /*connect(m_updatesAvailableNotification, QOverload<unsigned int>::of(&KNotification::activated), this, &LliurexUpIndicator::launchLlxup);*/
+                    connect(updateAction,&KNotificationAction::activated,this,&LliurexUpIndicator::launchLlxup);
+                     m_updatesAvailableNotification->sendEvent();
                 }
             }
         }
@@ -298,7 +313,13 @@ void LliurexUpIndicator::changeTryIconState(int state,bool showNotification=true
         setSubToolTip(subtooltip);
         setIconName("lliurexupnotifier-running");
         notificationIcon="lliurexupnotifier-running";
-        m_remoteUpdateNotification = KNotification::event(QStringLiteral("remoteUpdate"), notificationTitle,notificationBody, notificationIcon, nullptr, KNotification::Persistent , QStringLiteral("llxupnotifier"));
+        /*m_remoteUpdateNotification = KNotification::event(QStringLiteral("remoteUpdate"), notificationTitle,notificationBody, notificationIcon, nullptr, KNotification::Persistent , QStringLiteral("llxupnotifier"));*/
+        m_remoteUpdateNotification = new KNotification(QStringLiteral("remoteUpdate"), KNotification::Persistent,this);
+        m_remoteUpdateNotification->setComponentName(QStringLiteral("llxupnotifier"));
+        m_remoteUpdateNotification->setTitle(notificationTitle);
+        m_remoteUpdateNotification->setText(notificationBody);
+        m_remoteUpdateNotification->setIconName(notificationIcon);
+        m_remoteUpdateNotification->sendEvent();
 
     }else {
         setStatus(PassiveStatus);

@@ -1,0 +1,29 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "juapesai@hotmail.com",
+                "Name": "Juan Ramon Pelegrina"
+            }
+        ],
+        "Category": "Utilities",
+        "Description": "Shows warnings about updates",
+        "Description[ca@valencia]": "Mostra avisos sobre actualitzacions",
+        "Description[ca]": "Mostra avisos sobre actualitzacions",
+        "Description[en_GB]":"Shows warnings about updates",
+        "Description[es]": "Muestra avisos sobre actualizaciones",
+        "EnabledByDefault": true,
+        "Icon": "lliurex-up-indicator",
+        "Id": "org.kde.plasma.lliurexupnotifier",
+        "License": "LGPL",
+        "Name": "LliureX Up",
+        "Name[ca@valencia]": "LliureX Up",
+        "Name[ca]": "LliureX Up",
+        "Name[en_GB]": "LliureX Up",
+        "Name[es]": "LliureX Up",
+        "Website": "https://lliurex.net/"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0",
+    "X-Plasma-NotificationAreaCategory": "SystemServices"
+}
