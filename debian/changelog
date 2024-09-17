@@ -1,3 +1,9 @@
+lliurex-up-indicator (25.05.3) noble; urgency=medium
+
+  * Initial release for Noble
+
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Tue, 17 Sep 2024 14:27:07 +0200
+
 lliurex-up-indicator (24.05.3) jammy; urgency=medium
 
   * Added support to auto-upgrades
