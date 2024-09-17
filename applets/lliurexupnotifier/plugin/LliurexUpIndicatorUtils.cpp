@@ -36,6 +36,7 @@
 #include <thread>
 
 using namespace edupals;
+using namespace edupals::variant;
 using namespace std;
 
 LliurexUpIndicatorUtils::LliurexUpIndicatorUtils(QObject *parent)
@@ -366,7 +367,7 @@ bool LliurexUpIndicatorUtils::isConnectionWithServer(){
     try{
         n4d::Client client;
         client=n4d::Client("https://server:9779");
-        variant::Variant test=client.call("MirrorManager","is_alive");
+        Variant test=client.call("MirrorManager","is_alive");
         return true;
                
     }catch(...){
@@ -380,7 +381,7 @@ bool LliurexUpIndicatorUtils::canStopAutoUpdate(){
     try{
         n4d::Client localClient;
         localClient=n4d::Client("https://localhost:9779");
-        variant::Variant result=localClient.call("LliurexUpManager","can_cancel_auto_upgrade");
+        Variant result=localClient.call("LliurexUpManager","can_cancel_auto_upgrade");
         return result;
     }catch(...){
         return false;
