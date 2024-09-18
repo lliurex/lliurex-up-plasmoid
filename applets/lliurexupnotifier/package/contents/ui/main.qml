@@ -78,7 +78,7 @@ PlasmoidItem {
     PlasmaCore.Action {
         id: configureAction
         text: i18n("Update the system")
-        icon.name:"lliurex-up-indicator.svg"
+        icon.name:"lliurex-up.svg"
         visible:lliurexUpIndicator.canLaunchLlxUp
         enabled:lliurexUpIndicator.canLaunchLlxUp
         onTriggered:action_llxup()
