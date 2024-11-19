@@ -47,7 +47,7 @@ public:
     bool runUpdateCache();
     bool checkRemote();
     bool isCacheUpdated();
-    bool isConnectionWithServer();
+    bool isConnectionWithADI();
     bool isAutoUpdateReady();
     bool isAutoUpdateRun();
     QString getAutoUpdateTime();

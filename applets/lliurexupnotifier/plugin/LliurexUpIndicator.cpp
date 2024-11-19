@@ -59,7 +59,7 @@ LliurexUpIndicator::LliurexUpIndicator(QObject *parent)
 
 void LliurexUpIndicator::plasmoidMode(){
 
-    bool isClient=false;
+    bool isADI=false;
     bool isDesktop=false;
     bool hideIndicator=false;
 
@@ -69,13 +69,11 @@ void LliurexUpIndicator::plasmoidMode(){
     if (userGroups.length()>0){
         if (!flavours.contains("None")){
             for (int i=0;i<flavours.count();i++){
-                if (flavours[i].contains("client")){
-                    isClient=true; 
-                }
                 if (flavours[i].contains("desktop")){
                     isDesktop=true;
                 }
-                if (flavours[i].contains("server")){
+                if (flavours[i].contains("adi")){
+                    isADI=true;
                     if (userGroups.contains("teachers")){
                         if ((!userGroups.contains("sudo")&&(!userGroups.contains("admins")))){
                             hideIndicator=true;
@@ -91,14 +89,11 @@ void LliurexUpIndicator::plasmoidMode(){
         }
     }
 
-    if (isClient){
+    if (!isADI){
         if (isDesktop){
             if (m_utils->isConnectionWithServer()){
                 hideIndicator=true;
             }
-        }else{
-            hideIndicator=true;
-        }
     }
 
     if (!hideIndicator){

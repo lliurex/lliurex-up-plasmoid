@@ -362,7 +362,7 @@ bool LliurexUpIndicatorUtils::isCacheUpdated(){
 
 }
 
-bool LliurexUpIndicatorUtils::isConnectionWithServer(){
+bool LliurexUpIndicatorUtils::isConnectionWithADI(){
 
     try{
         n4d::Client client;
