@@ -126,6 +126,17 @@ void LliurexUpIndicator::isLliurexUpRunning(){
     if (!isWorking){
         if (LliurexUpIndicator::TARGET_FILE.exists()) {
             isAlive();
+        }else{
+            if (m_utils->isAutoUpdateReady()){
+                if (!autoUpdatesDisplayed && thereAreUpdates){
+                    changeTryIconState(0,true);
+                }
+                
+            }else{
+                if (autoUpdatesDisplayed){
+                    hideAutoUpdate();
+                }
+            }
         }
     }
 }
@@ -185,6 +196,7 @@ void LliurexUpIndicator::dbusDone(bool result){
     }
 
     if (result){
+        thereAreUpdates=result;
         changeTryIconState(0,true);
     }
 
@@ -255,7 +267,7 @@ void LliurexUpIndicator::changeTryIconState(int state,bool showNotification=true
             }else{
                 setCanStopAutoUpdate(false);
             }
-            
+            autoUpdatesDisplayed=true;
             QString timeToUpdate=m_utils->getAutoUpdateTime();
             notificationBody=i18n("The system will be update automatically at")+" "+timeToUpdate;
             notificationIcon="lliurexupnotifier-autoupdate";
@@ -332,13 +344,19 @@ void LliurexUpIndicator::cancelAutoUpdate()
 {
 
     m_utils->stopAutoUpdate();
+    hideAutoUpdate();
+    
+}
+
+void LliurexUpIndicator::hideAutoUpdate(){
+
     if (m_updatesAvailableNotification) { m_updatesAvailableNotification->close(); }
-    if (m_utils->isStudent){
-        changeTryIconState(1);
-    }else{
-        rememberUpdate=false;    
-        changeTryIconState(0,false);
-    }
+        if (m_utils->isStudent){
+            changeTryIconState(1);
+        }else{
+            rememberUpdate=false;    
+            changeTryIconState(0,false);
+        }
 
 }
 
