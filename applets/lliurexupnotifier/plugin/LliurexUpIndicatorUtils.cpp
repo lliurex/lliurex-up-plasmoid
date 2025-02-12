@@ -362,20 +362,6 @@ bool LliurexUpIndicatorUtils::isCacheUpdated(){
 
 }
 
-bool LliurexUpIndicatorUtils::isConnectionWithServer(){
-
-    try{
-        n4d::Client client;
-        client=n4d::Client("https://server:9779");
-        Variant test=client.call("MirrorManager","is_alive");
-        return true;
-               
-    }catch(...){
-        return false;
-    }
-     
-}
-
 bool LliurexUpIndicatorUtils::canStopAutoUpdate(){
 
     try{
