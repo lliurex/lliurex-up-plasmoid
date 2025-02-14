@@ -1,3 +1,9 @@
+lliurex-up-indicator (24.05.3.1) jammy-testing; urgency=medium
+
+  * Test version
+  
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Fri, 14 Feb 2025 12:01:32 +0100
+
 lliurex-up-indicator (24.05.3) jammy; urgency=medium
 
   * Added support to auto-upgrades
