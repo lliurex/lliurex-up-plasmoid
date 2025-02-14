@@ -1,0 +1,5 @@
+usr/lib/*/qt5/qml/org/kde/plasma/private/lliurexupnotifier/
+usr/share/kservices5/plasma-applet-org.kde.plasma.lliurexupnotifier.desktop
+usr/share/metainfo/org.kde.plasma.lliurexupnotifier.appdata.xml
+usr/share/plasma/plasmoids/org.kde.plasma.lliurexupnotifier/
+usr/share/locale/*/*/*.mo
