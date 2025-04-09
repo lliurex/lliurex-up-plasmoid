@@ -1,3 +1,9 @@
+lliurex-up-indicator (25.05.6) noble; urgency=medium
+
+  * Fixed translations of knotifications
+
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Wed, 09 Apr 2025 13:50:35 +0200
+
 lliurex-up-indicator (25.05.5) noble; urgency=medium
 
   * Fixed import library in main.qml
