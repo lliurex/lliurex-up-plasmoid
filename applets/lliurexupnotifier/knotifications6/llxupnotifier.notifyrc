@@ -2,26 +2,31 @@
 IconName=lliurex-up
 Comment=Lliurex-Up
 Comment[ca@valencia]=Lliurex-Up
+Comment[ca]=Lliurex-Up
 Comment[es]=Lliurex-Up
 
 
 [Event/Update]
 Name=There are new packages ready to be updated or installed
 Name[ca@valencia]=Hi ha nous paquets preparats per a actualitzar-los i/o instal·lar-los
+Name[ca]=Hi ha nous paquets preparats per a actualitzar-los i/o instal·lar-los
 Name[es]=Hay nuevo paquetes listos para ser actualizados y/o instalados
 
 Comment=Updates Available
 Comment[ca@valencia]=Actualitzacions disponibles
+Comment[ca]=Actualitzacions disponibles
 Comment[es]=Actualizaciones disponibles
 Action=Popup
 
 [Event/remoteUpdate]
 Name=Lliurex-Up is being executed
-Name[ca@valencia]=S'està executant el LliureX Up
+Name[ca@valencia]=S'està executant el Lliurex-Up
+Name[ca]=S'està executant el Lliurex-Up
 Name[es]=Lliurex-Up está siendo ejecutado
 
 Comment=Lliurex-Up is being executed
-Comment[ca@valencia]=S'està executant el LliureX Up
+Comment[ca@valencia]=S'està executant el Lliurex-Up
+Comment[ca]=S'està executant el Lliurex-Up
 Comment[es]=Lliurex-Up está siendo ejecutado
 Action=Popup
 
