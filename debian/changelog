@@ -1,3 +1,9 @@
+lliurex-up-indicator (25.05.7) noble; urgency=medium
+
+  * Added info about pause of automatic updates
+
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Thu, 10 Apr 2025 14:38:03 +0200
+
 lliurex-up-indicator (25.05.6) noble; urgency=medium
 
   * Fixed translations of knotifications
