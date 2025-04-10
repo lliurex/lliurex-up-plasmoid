@@ -12,10 +12,10 @@ Name[ca@valencia]=Hi ha nous paquets preparats per a actualitzar-los i/o instal�
 Name[ca]=Hi ha nous paquets preparats per a actualitzar-los i/o instal·lar-los
 Name[es]=Hay nuevo paquetes listos para ser actualizados y/o instalados
 
-Comment=Updates Available
-Comment[ca@valencia]=Actualitzacions disponibles
-Comment[ca]=Actualitzacions disponibles
-Comment[es]=Actualizaciones disponibles
+Comment=Occurs when updates are available
+Comment[ca@valencia]=Ocorre quan hi ha actualitzacions disponibles
+Comment[ca]=Ocorre quan hi ha actualitzacions disponibles
+Comment[es]=Ocurre cuando hay actualizaciones disponibles
 Action=Popup
 
 [Event/remoteUpdate]
@@ -24,9 +24,9 @@ Name[ca@valencia]=S'està executant el Lliurex-Up
 Name[ca]=S'està executant el Lliurex-Up
 Name[es]=Lliurex-Up está siendo ejecutado
 
-Comment=Lliurex-Up is being executed
-Comment[ca@valencia]=S'està executant el Lliurex-Up
-Comment[ca]=S'està executant el Lliurex-Up
-Comment[es]=Lliurex-Up está siendo ejecutado
+Comment=Occurs when Lliurex-Up is run remotely or automatically
+Comment[ca@valencia]=Ocorre quan Lliurex-Up s'executa de manera remota o automàticament
+Comment[ca]=Ocorre quan Lliurex-Up s'executa de manera remota o automàticament
+Comment[es]=Ocurre cuando Lliurex-Up se ejecuta de forma remota o automáticamente
 Action=Popup
 
