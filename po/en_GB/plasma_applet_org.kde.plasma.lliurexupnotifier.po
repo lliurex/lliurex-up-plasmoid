@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-12 13:45+0100\n"
-"PO-Revision-Date: 2025-02-12 13:46+0100\n"
+"POT-Creation-Date: 2025-04-10 14:12+0200\n"
+"PO-Revision-Date: 2025-04-10 14:15+0200\n"
 "Last-Translator: lliurex <lliurex@lliurex.net>\n"
 "Language-Team: Catalan <kde-i18n-ca@kde.org>\n"
 "Language: es\n"
@@ -17,15 +17,15 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 3.4.2\n"
 
-#: ../applets/lliurexupnotifier/package/contents/ui/main.qml:71
-#: ../applets/lliurexupnotifier/package/contents/ui/main.qml:99
-#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:238
+#: ../applets/lliurexupnotifier/package/contents/ui/main.qml:72
+#: ../applets/lliurexupnotifier/package/contents/ui/main.qml:100
+#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:239
 #, kde-format
 msgid "Wait until tomorrow"
 msgstr "Wait until tomorrow"
 
-#: ../applets/lliurexupnotifier/package/contents/ui/main.qml:73
-#: ../applets/lliurexupnotifier/package/contents/ui/main.qml:110
+#: ../applets/lliurexupnotifier/package/contents/ui/main.qml:74
+#: ../applets/lliurexupnotifier/package/contents/ui/main.qml:111
 #, kde-format
 msgid "Update the system"
 msgstr "Update the system"
@@ -40,32 +40,37 @@ msgstr "No updates availables"
 msgid "Lliurex-Up"
 msgstr "Lliurex-Up"
 
-#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:207
+#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:208
 #, kde-format
 msgid "There are new packages ready to be updated or installed"
 msgstr "There are new packages ready to be updated or installed"
 
-#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:229
+#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:230
 #, kde-format
 msgid "The system will be update automatically at"
 msgstr "The system will be update automatically at"
 
-#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:259
+#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:255
+#, kde-format
+msgid "Automatic updates paused until "
+msgstr "Automatic updates paused until "
+
+#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:267
 #, kde-format
 msgid "Update now"
 msgstr "Update now"
 
-#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:271
+#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:279
 #, kde-format
 msgid "Lliurex-Up is being run remotely or automatically"
 msgstr "Lliurex-Up is being run remotely or automatically"
 
-#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:272
+#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:280
 #, kde-format
 msgid "Do not turn-off or restart your computer"
 msgstr "Do not turn-off or restart your computer"
 
-#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:293
+#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:301
 #, kde-format
 msgid "Last execution: "
 msgstr "Last execution: "

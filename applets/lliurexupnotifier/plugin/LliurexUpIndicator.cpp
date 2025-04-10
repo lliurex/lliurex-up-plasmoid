@@ -201,6 +201,7 @@ void LliurexUpIndicator::changeTryIconState(int state,bool showNotification=true
     QString notificationTitle;
     QString notificationBody;
     QString notificationIcon;
+    QString pauseInfo;
     bool showStopOption=false;
 
     if (state==0){
@@ -248,8 +249,15 @@ void LliurexUpIndicator::changeTryIconState(int state,bool showNotification=true
                 setCanLaunchLlxUp(true);
                 setCanStopAutoUpdate(false);
                 notificationIcon="lliurexupnotifier";
+                QString tmpDate=m_utils->getAutoUpdatePause();
+                
+                if (tmpDate!=""){
+                    pauseInfo=i18n("Automatic updates paused until ")+tmpDate;
+                }
+                
                 setToolTip(tooltip);
-                setSubToolTip(subtooltip+"\n"+notificationBody);
+                setSubToolTip(subtooltip+"\n"+pauseInfo);
+
                 if ((showNotification)&&(rememberUpdate)){
                     m_updatesAvailableNotification = new KNotification(QStringLiteral("Update"), KNotification::CloseOnTimeout,this);
                     m_updatesAvailableNotification->setComponentName(QStringLiteral("llxupnotifier"));
