@@ -1,3 +1,9 @@
+lliurex-up-indicator (24.05.3.3) jammy-testing; urgency=medium
+
+  * Added info about paused of automatic updates
+  
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Fri, 11 Apr 2025 10:09:58 +0200
+
 lliurex-up-indicator (24.05.3.2) jammy-testing; urgency=medium
 
   * Test version
