@@ -434,3 +434,28 @@ void LliurexUpIndicatorUtils::stopAutoUpdate(){
     }
     
 }
+
+QString LliurexUpIndicatorUtils::getAutoUpdatePause(){
+
+    QString dateToUpdate="";
+
+    try{
+        n4d::Client localClient;
+        localClient=n4d::Client("https://localhost:9779");
+        variant::Variant result=localClient.call("LliurexUpManager","read_current_config");
+       
+        int weeksOfPause=result["data"]["weeksOfPause"].get_int32();
+
+        if (weeksOfPause>0){
+            QString tmpDate=QString::fromStdString(result["data"]["dateToUpdate"].get_string());
+            QDate date1=QDate::fromString(tmpDate,"yyyy-MM-dd");
+            dateToUpdate=date1.toString("dd/MM/yyyy");
+
+        }
+    }catch (...){
+       
+    }
+
+    return dateToUpdate; 
+
+}

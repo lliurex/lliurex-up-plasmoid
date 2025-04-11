@@ -58,6 +58,7 @@ public:
     bool canStopAutoUpdate();
     void stopAutoUpdate();
     void cleanCache();
+    QString getAutoUpdatePause();
 
 private:    
     
