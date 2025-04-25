@@ -48,6 +48,8 @@ LliurexUpIndicator::LliurexUpIndicator(QObject *parent)
 
     QString initTitle=i18n("No updates availables");
     setSubToolTip(initTitle);
+    setCanLaunchLlxUp(false);
+    setCanStopAutoUpdate(false);
     plasmoidMode();
 
     connect(m_timer, &QTimer::timeout, this, &LliurexUpIndicator::worker);
