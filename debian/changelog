@@ -1,3 +1,9 @@
+lliurex-up-indicator (25.05.8) noble; urgency=medium
+
+  * Fixed hide actions when widget is not visible
+  
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Fri, 25 Apr 2025 14:41:38 +0200
+
 lliurex-up-indicator (25.05.7) noble; urgency=medium
 
   * Added info about pause of automatic updates
