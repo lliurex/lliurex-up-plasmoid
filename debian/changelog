@@ -1,3 +1,9 @@
+lliurex-up-indicator (25.05.10) noble; urgency=medium
+
+  * Fixed detection of when to hide the applet
+  
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Tue, 29 Apr 2025 15:30:26 +0200
+
 lliurex-up-indicator (25.05.9) noble; urgency=medium
 
   * Minor fixed in tooltip
