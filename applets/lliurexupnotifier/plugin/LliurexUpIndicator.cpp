@@ -255,10 +255,12 @@ void LliurexUpIndicator::changeTryIconState(int state,bool showNotification=true
                 
                 if (tmpDate!=""){
                     pauseInfo=i18n("Automatic updates paused until ")+tmpDate;
+                    setSubToolTip(subtooltip+"\n"+pauseInfo);
+                }else{
+                    setSubToolTip(subtooltip);
                 }
                 
                 setToolTip(tooltip);
-                setSubToolTip(subtooltip+"\n"+pauseInfo);
 
                 if ((showNotification)&&(rememberUpdate)){
                     m_updatesAvailableNotification = new KNotification(QStringLiteral("Update"), KNotification::CloseOnTimeout,this);
