@@ -62,8 +62,9 @@ LliurexUpIndicator::LliurexUpIndicator(QObject *parent)
 void LliurexUpIndicator::plasmoidMode(){
 
     QStringList userGroups=m_utils->getUserGroups();
-    updatedInfo=true;
-     
+    if (userGroups.size()>0){
+        updatedInfo=true;
+    }
 }
 
 void LliurexUpIndicator::initWatcher(){
