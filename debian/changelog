@@ -1,3 +1,9 @@
+lliurex-up-indicator (25.05.11) noble; urgency=medium
+
+  * Fixed detection of remote execution
+  
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Fri, 02 May 2025 13:34:57 +0200
+
 lliurex-up-indicator (25.05.10) noble; urgency=medium
 
   * Fixed detection of when to hide the applet
