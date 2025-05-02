@@ -299,7 +299,7 @@ bool LliurexUpIndicatorUtils::checkRemote(){
 
     QStringList remotePts;
     QProcess process;
-    QString cmd="who | grep -v \"(:0\"";
+    QString cmd="who | grep -v \"(:1\"";
 
     process.start("/bin/sh", QStringList()<< "-c" 
                        << cmd);
@@ -311,7 +311,7 @@ bool LliurexUpIndicatorUtils::checkRemote(){
 
     if (remoteUsers.size()>0){
         QRegularExpression re("pts/\\d+");
-        QRegularExpressionMatch match = re.match(remoteUsers[0]);
+        QRegularExpressionMatch match = re.match(remoteUsers[1]);
         if (match.hasMatch()) {
             QString matched = match.captured(0);
             remotePts.push_back(matched);
