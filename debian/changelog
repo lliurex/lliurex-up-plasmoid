@@ -1,3 +1,9 @@
+lliurex-up-indicator (25.05.12) noble; urgency=medium
+
+  * Fixed feedback about automatic updates
+  
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Tue, 06 May 2025 14:31:25 +0200
+
 lliurex-up-indicator (25.05.11) noble; urgency=medium
 
   * Fixed detection of remote execution
