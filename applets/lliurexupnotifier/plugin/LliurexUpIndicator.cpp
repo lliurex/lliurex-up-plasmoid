@@ -262,6 +262,7 @@ void LliurexUpIndicator::changeTryIconState(int state,bool showNotification=true
                     connect(cancelUpdateAction,&KNotificationAction::activated,this,&LliurexUpIndicator::cancelAutoUpdate);
                     m_updatesAvailableNotification->sendEvent();
                 }
+            }
         }else{
             if (!m_utils->isStudent){
                 setStatus(ActiveStatus);
