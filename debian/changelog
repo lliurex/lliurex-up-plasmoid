@@ -1,3 +1,9 @@
+lliurex-up-indicator (24.05.3.5) jammy-testing; urgency=medium
+
+  * Fixed feedback about automatic updates
+  
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Tue, 06 May 2025 14:24:00 +0200
+
 lliurex-up-indicator (24.05.3.4) jammy-testing; urgency=medium
 
   * Minor fixed in tooltip
