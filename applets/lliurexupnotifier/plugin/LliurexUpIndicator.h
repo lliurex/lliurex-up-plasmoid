@@ -80,6 +80,7 @@ public:
 
     bool runUpdateCache();
     void isAlive();
+    void hideAutoUpdate();
 
 
 public slots:
@@ -121,6 +122,8 @@ private:
     bool isWorking=false;
     int lastUpdate=0;
     bool rememberUpdate=true;
+    bool thereAreUpdates=false;
+    bool autoUpdatesDisplayed=false;
     LliurexUpIndicatorUtils* m_utils;
     QPointer<KNotification> m_updatesAvailableNotification;
     QPointer<KNotification> m_remoteUpdateNotification;

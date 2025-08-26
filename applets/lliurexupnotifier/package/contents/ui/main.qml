@@ -1,5 +1,6 @@
 import QtQuick 2.15
 import QtQuick.Layouts 1.15
+import QtQuick.Controls 2.15
 
 import org.kde.plasma.plasmoid 2.0
 import org.kde.plasma.core 2.1 as PlasmaCore
@@ -51,11 +52,41 @@ Item {
         implicitHeight: PlasmaCore.Units.gridUnit * 6
 
         PlasmaExtras.PlaceholderMessage {
+            id:phMsg
             anchors.centerIn: parent
             width: parent.width - (PlasmaCore.Units.gridUnit * 4)
             iconName: Plasmoid.icon
             text:Plasmoid.toolTipSubText
         }
+        PlasmaComponents3.Button {
+            height:35
+            anchors.top:phMsg.bottom
+            anchors.horizontalCenter:phMsg.horizontalCenter
+            visible:lliurexUpIndicator.canLaunchLlxUp?true:false
+            display:AbstractButton.TextBesideIcon
+            icon.name:{
+                if (lliurexUpIndicator.canStopAutoUpdate){
+                    "chronometer-pause"
+                }else{
+                    "lliurex-up"
+                }
+            }
+            text:{
+                if (lliurexUpIndicator.canStopAutoUpdate){
+                    i18n("Wait until tomorrow")
+                }else{
+                     i18n("Update the system")
+                }
+            }
+            onClicked:{
+                if (lliurexUpIndicator.canStopAutoUpdate){
+                    lliurexUpIndicator.cancelAutoUpdate()
+                }else{
+                    lliurexUpIndicator.launchLlxup()
+                }
+            }
+        } 
+        
     }
 
  
