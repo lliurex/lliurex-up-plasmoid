@@ -48,6 +48,8 @@ LliurexUpIndicator::LliurexUpIndicator(QObject *parent)
 
     QString initTitle=i18n("No updates availables");
     setSubToolTip(initTitle);
+    setCanLaunchLlxUp(false);
+    setCanStopAutoUpdate(false);
     plasmoidMode();
 
     connect(m_timer, &QTimer::timeout, this, &LliurexUpIndicator::worker);
@@ -126,6 +128,21 @@ void LliurexUpIndicator::isLliurexUpRunning(){
     if (!isWorking){
         if (LliurexUpIndicator::TARGET_FILE.exists()) {
             isAlive();
+        }else{
+            if (m_utils->isAutoUpdateReady()){
+                if (thereAreUpdates){
+                    if (!autoUpdatesDisplayed){
+                        changeTryIconState(0,true);
+                    }else{
+                        changeTryIconState(0,false);
+                    }
+                }
+                
+            }else{
+                if (autoUpdatesDisplayed){
+                    hideAutoUpdate();
+                }
+            }
         }
     }
 }
@@ -185,6 +202,7 @@ void LliurexUpIndicator::dbusDone(bool result){
     }
 
     if (result){
+        thereAreUpdates=result;
         changeTryIconState(0,true);
     }
 
@@ -214,7 +232,19 @@ void LliurexUpIndicator::checkLlxUp(){
         m_timer_run->stop();
         isWorking=false;
         remoteUpdateInfo=false;
-        changeTryIconState(1,false);
+        if (m_utils->isAutoUpdateReady()){
+            if (thereAreUpdates){
+                if (!autoUpdatesDisplayed){
+                    changeTryIconState(0,true);
+                }else{
+                    changeTryIconState(0,false);
+                }
+            }else{
+                changeTryIconState(1,false); 
+            }
+        }else{
+            changeTryIconState(1,false);
+        }
           
     } 
 
@@ -232,6 +262,7 @@ void LliurexUpIndicator::changeTryIconState(int state,bool showNotification=true
     QString notificationTitle;
     QString notificationBody;
     QString notificationIcon;
+    QString pauseInfo;
     bool showStopOption=false;
 
     if (state==0){
@@ -255,18 +286,20 @@ void LliurexUpIndicator::changeTryIconState(int state,bool showNotification=true
             }else{
                 setCanStopAutoUpdate(false);
             }
-            
+            autoUpdatesDisplayed=true;
             QString timeToUpdate=m_utils->getAutoUpdateTime();
             notificationBody=i18n("The system will be update automatically at")+" "+timeToUpdate;
             notificationIcon="lliurexupnotifier-autoupdate";
             setToolTip(tooltip);
             setSubToolTip(subtooltip+"\n"+notificationBody);
-            m_updatesAvailableNotification = KNotification::event(QStringLiteral("Update"), subtooltip, notificationBody, notificationIcon, nullptr, KNotification::CloseOnTimeout , QStringLiteral("llxupnotifier"));
-            const QString name = i18n("Wait until tomorrow");
-            if (showStopOption){
-                m_updatesAvailableNotification->setDefaultAction(name);
-                m_updatesAvailableNotification->setActions({name});
-                connect(m_updatesAvailableNotification, QOverload<unsigned int>::of(&KNotification::activated), this, &LliurexUpIndicator::cancelAutoUpdate);
+            if (showNotification){
+                m_updatesAvailableNotification = KNotification::event(QStringLiteral("Update"), subtooltip, notificationBody, notificationIcon, nullptr, KNotification::CloseOnTimeout , QStringLiteral("llxupnotifier"));
+                const QString name = i18n("Wait until tomorrow");
+                if (showStopOption){
+                    m_updatesAvailableNotification->setDefaultAction(name);
+                    m_updatesAvailableNotification->setActions({name});
+                    connect(m_updatesAvailableNotification, QOverload<unsigned int>::of(&KNotification::activated), this, &LliurexUpIndicator::cancelAutoUpdate);
+                }
             }
         }else{
             if (!m_utils->isStudent){
@@ -275,8 +308,8 @@ void LliurexUpIndicator::changeTryIconState(int state,bool showNotification=true
                 setCanLaunchLlxUp(true);
                 setCanStopAutoUpdate(false);
                 notificationIcon="lliurexupnotifier";
+                setSubToolTip(subtooltip);
                 setToolTip(tooltip);
-                setSubToolTip(subtooltip+"\n"+notificationBody);
                 if ((showNotification)&&(rememberUpdate)){
                     m_updatesAvailableNotification = KNotification::event(QStringLiteral("Update"), subtooltip, notificationBody, notificationIcon, nullptr, KNotification::CloseOnTimeout , QStringLiteral("llxupnotifier"));
                     const QString name = i18n("Update now");
@@ -332,13 +365,19 @@ void LliurexUpIndicator::cancelAutoUpdate()
 {
 
     m_utils->stopAutoUpdate();
+    hideAutoUpdate();
+    
+}
+
+void LliurexUpIndicator::hideAutoUpdate(){
+
     if (m_updatesAvailableNotification) { m_updatesAvailableNotification->close(); }
-    if (m_utils->isStudent){
-        changeTryIconState(1);
-    }else{
-        rememberUpdate=false;    
-        changeTryIconState(0,false);
-    }
+        if (m_utils->isStudent){
+            changeTryIconState(1);
+        }else{
+            rememberUpdate=false;    
+            changeTryIconState(0,false);
+        }
 
 }
 
