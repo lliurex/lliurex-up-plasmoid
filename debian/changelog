@@ -1,3 +1,10 @@
+lliurex-up-indicator (24.05.4) jammy; urgency=medium
+
+  * Fixed notifications settings file
+  * Improved usability
+
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Tue, 26 Aug 2025 10:48:08 +0200
+
 lliurex-up-indicator (24.05.3) jammy; urgency=medium
 
   * Added support to auto-upgrades
