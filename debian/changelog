@@ -1,3 +1,9 @@
+lliurex-up-indicator (25.05.13) noble; urgency=medium
+
+  * Improved interaction with dbus
+  
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Mon, 16 Feb 2026 08:16:22 +0100
+
 lliurex-up-indicator (25.05.12) noble; urgency=medium
 
   * Fixed feedback about automatic updates
