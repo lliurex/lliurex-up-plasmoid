@@ -19,20 +19,15 @@
 #define PLASMA_LLIUREX_UP_INDICATOR_H
 
 #include <QObject>
-#include <QProcess>
-#include <QPointer>
-#include <KNotification>
-#include <QDir>
 #include <QFile>
+#include <QPointer>
 #include <QThread>
-#include <QFileSystemWatcher>
-
 #include "LliurexUpIndicatorUtils.h"
 
 class QTimer;
+class QFileSystemWatcher;
 class KNotification;
 class AsyncDbus;
-
 
 class LliurexUpIndicator : public QObject
 {
@@ -57,7 +52,7 @@ public:
         NeedsAttentionStatus
     };
 
-    LliurexUpIndicator(QObject *parent = nullptr);
+    explicit LliurexUpIndicator(QObject *parent = nullptr);
 
     TrayStatus status() const;
     void changeTryIconState (int state,bool showNotification);
@@ -79,16 +74,10 @@ public:
     void setCanStopAutoUpdate(bool);
 
     bool runUpdateCache();
-    void isAlive();
-    void hideAutoUpdate();
 
 
 public slots:
     
-    void initWatcher();
-    void worker();
-    void isLliurexUpRunning();
-    void checkLlxUp();
     void launchLlxup();
     void cancelAutoUpdate();
 
@@ -104,10 +93,14 @@ signals:
 private:
 
     AsyncDbus* adbus;
-    void plasmoidMode();
+    void initWatcher();
+    void worker();
+    void hideAutoUpdate();
+
     QTimer *m_timer = nullptr;
     QTimer *m_timer_run=nullptr;
     QTimer *m_timer_cache=nullptr;
+    QTimer *m_watcher_timer = nullptr;
     TrayStatus m_status = PassiveStatus;
     QString m_iconName = QStringLiteral("lliurexupnotifier");
     QString m_toolTip;
@@ -124,16 +117,18 @@ private:
     bool rememberUpdate=true;
     bool thereAreUpdates=false;
     bool autoUpdatesDisplayed=false;
+
     LliurexUpIndicatorUtils* m_utils;
     QPointer<KNotification> m_updatesAvailableNotification;
     QPointer<KNotification> m_remoteUpdateNotification;
     QFileSystemWatcher *watcher = nullptr;
-    QString refPath="/var/run";
 
 private slots:
 
-     void updateCache();
-     void dbusDone(bool status);
+    void handleStartFinished(bool hideWidget);
+    void updateCache();
+    void updateStatus();
+    void dbusDone(bool status);
      
 };
 
@@ -175,4 +170,4 @@ signals:
 };
 
 
-#endif // PLASMA_LLIUREX_DISK_QUOTA_H
+#endif // PLASMA_LLIUREX_UP_INDICATOR_H
