@@ -39,8 +39,6 @@ case "$1" in
         kbuildsycoca5 --noincremental > /dev/null 2>&1 || true
     ;;
 
-    ;;
-
     abort-upgrade|abort-remove|abort-deconfigure)
     ;;
 
