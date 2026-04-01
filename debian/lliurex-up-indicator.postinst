@@ -23,6 +23,22 @@ case "$1" in
         newVersion=$(dpkg-query --showformat='${Version}' --show lliurex-up-indicator)
         tokenDir=/var/lib/lliurex-up-indicator/version
         echo "$newVersion" > "$tokenDir" || true
+
+        QML_DIR="/usr/share/plasma/plasmoids/org.kde.plasma.lliurexupnotifier/contents/ui"
+
+        if [ -d "$QML_DIR" ];then
+            find "$QML_DIR" -name "*.qml" -exec touch {} + || true
+        fi
+
+        QML_DIR="/usr/lib/x86_64-linux-gnu/qt5/qml/org/kde/plasma/private/lliurexupnotifier"
+
+        if [ -d "$QML_DIR" ];then
+            touch "$QML_DIR"/* || true
+            touch "$QML_DIR" || true
+        fi
+        kbuildsycoca5 --noincremental > /dev/null 2>&1 || true
+    ;;
+
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
