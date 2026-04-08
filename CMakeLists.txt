@@ -33,6 +33,7 @@ include(ECMQmlModule)
 
 find_package(Qt6 ${QT_MIN_VERSION} CONFIG REQUIRED
     Core
+    Concurrent
     DBus
     Gui
     Quick

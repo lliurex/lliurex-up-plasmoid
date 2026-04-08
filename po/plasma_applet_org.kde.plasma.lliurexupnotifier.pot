@@ -1,14 +1,14 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the  package.
+# This file is distributed under the same license as the lliurexupnotifier package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version:  \n"
+"Project-Id-Version: lliurexupnotifier \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-10 14:12+0200\n"
+"POT-Creation-Date: 2026-04-08 09:06+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,57 +17,57 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../applets/lliurexupnotifier/package/contents/ui/main.qml:72 ../applets/lliurexupnotifier/package/contents/ui/main.qml:100 ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:239
+#: ../applets/lliurexupnotifier/package/contents/ui/main.qml:70 ../applets/lliurexupnotifier/package/contents/ui/main.qml:98 ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:195
 #, kde-format
 msgid "Wait until tomorrow"
 msgstr ""
 
-#: ../applets/lliurexupnotifier/package/contents/ui/main.qml:74 ../applets/lliurexupnotifier/package/contents/ui/main.qml:111
+#: ../applets/lliurexupnotifier/package/contents/ui/main.qml:72 ../applets/lliurexupnotifier/package/contents/ui/main.qml:109
 #, kde-format
 msgid "Update the system"
 msgstr ""
 
-#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:49
+#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:61
 #, kde-format
 msgid "No updates availables"
 msgstr ""
 
-#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:199
+#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:163
 #, kde-format
 msgid "Lliurex-Up"
 msgstr ""
 
-#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:208
+#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:173
 #, kde-format
 msgid "There are new packages ready to be updated or installed"
 msgstr ""
 
-#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:230
+#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:176
 #, kde-format
 msgid "The system will be update automatically at"
 msgstr ""
 
-#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:255
+#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:205
 #, kde-format
 msgid "Automatic updates paused until "
 msgstr ""
 
-#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:267
+#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:217
 #, kde-format
 msgid "Update now"
 msgstr ""
 
-#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:279
+#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:230
+#, kde-format
+msgid "Last execution: "
+msgstr ""
+
+#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:238
 #, kde-format
 msgid "Lliurex-Up is being run remotely or automatically"
 msgstr ""
 
-#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:280
+#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:239
 #, kde-format
 msgid "Do not turn-off or restart your computer"
-msgstr ""
-
-#: ../applets/lliurexupnotifier/plugin/LliurexUpIndicator.cpp:301
-#, kde-format
-msgid "Last execution: "
 msgstr ""

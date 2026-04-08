@@ -16,14 +16,4 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "plugin.h"
-#include "LliurexUpIndicator.h"
-#include "LliurexUpIndicatorUtils.h"
-
 #include <QtQml>
-
-void LliurexUpIndicatorPlugin::registerTypes (const char *uri)
-{
-    Q_ASSERT(uri == QLatin1String("org.kde.plasma.private.lliurexupnotifier"));
-    qmlRegisterType<LliurexUpIndicator>(uri, 1, 0, "LliurexUpIndicator");
-    qmlRegisterType<LliurexUpIndicatorUtils>(uri, 1, 0, "LliurexUpIndicatorUtils");
-}

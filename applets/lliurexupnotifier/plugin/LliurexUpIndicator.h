@@ -19,35 +19,24 @@
 #define PLASMA_LLIUREX_UP_INDICATOR_H
 
 #include <QObject>
-#include <QProcess>
-#include <QPointer>
-#include <KNotification>
-#include <QDir>
 #include <QFile>
-#include <QThread>
-#include <QFileSystemWatcher>
+#include <QPointer>
+
+#include <QtQml/qqmlregistration.h>
 
 #include "LliurexUpIndicatorUtils.h"
 
 class QTimer;
+class QFileSystemWatcher;
 class KNotification;
-class AsyncDbus;
 
 
 class LliurexUpIndicator : public QObject
 {
     Q_OBJECT
+    QML_ELEMENT
 
-
-    Q_PROPERTY(TrayStatus status READ status NOTIFY statusChanged)
-    Q_PROPERTY(QString toolTip READ toolTip NOTIFY toolTipChanged)
-    Q_PROPERTY(QString subToolTip READ subToolTip NOTIFY subToolTipChanged)
-    Q_PROPERTY(QString iconName READ iconName NOTIFY iconNameChanged)
-    Q_PROPERTY(bool canLaunchLlxUp READ canLaunchLlxUp NOTIFY canLaunchLlxUpChanged)
-    Q_PROPERTY(bool canStopAutoUpdate READ canStopAutoUpdate NOTIFY canStopAutoUpdateChanged)
-    Q_ENUMS(TrayStatus)
-
-public:
+    public:
     /**
      * System tray icon states.
      */
@@ -57,7 +46,17 @@ public:
         NeedsAttentionStatus
     };
 
-    LliurexUpIndicator(QObject *parent = nullptr);
+    Q_PROPERTY(TrayStatus status READ status NOTIFY statusChanged)
+    Q_PROPERTY(QString toolTip READ toolTip NOTIFY toolTipChanged)
+    Q_PROPERTY(QString subToolTip READ subToolTip NOTIFY subToolTipChanged)
+    Q_PROPERTY(QString iconName READ iconName NOTIFY iconNameChanged)
+    Q_PROPERTY(bool canLaunchLlxUp READ canLaunchLlxUp NOTIFY canLaunchLlxUpChanged)
+    Q_PROPERTY(bool canStopAutoUpdate READ canStopAutoUpdate NOTIFY canStopAutoUpdateChanged)
+    Q_ENUM(TrayStatus)
+
+
+
+    explicit LliurexUpIndicator(QObject *parent = nullptr);
 
     TrayStatus status() const;
     void changeTryIconState (int state,bool showNotification);
@@ -79,16 +78,10 @@ public:
     void setCanStopAutoUpdate(bool);
 
     bool runUpdateCache();
-    void isAlive();
-    void hideAutoUpdate();
 
 
 public slots:
     
-    void initWatcher();
-    void worker();
-    void isLliurexUpRunning();
-    void checkLlxUp();
     void launchLlxup();
     void cancelAutoUpdate();
 
@@ -103,11 +96,12 @@ signals:
 
 private:
 
-    AsyncDbus* adbus;
-    void plasmoidMode();
+    void initWatcher();
+    void worker();
+    void hideAutoUpdate();
+
     QTimer *m_timer = nullptr;
-    QTimer *m_timer_run=nullptr;
-    QTimer *m_timer_cache=nullptr;
+    QTimer *m_watcher_timer = nullptr;
     TrayStatus m_status = PassiveStatus;
     QString m_iconName = QStringLiteral("lliurexupnotifier");
     QString m_toolTip;
@@ -120,59 +114,24 @@ private:
     bool updatedInfo=false;
     bool remoteUpdateInfo=false;
     bool isWorking=false;
+    bool isCacheWorking=false;
     int lastUpdate=0;
     bool rememberUpdate=true;
     bool thereAreUpdates=false;
     bool autoUpdatesDisplayed=false;
+
     LliurexUpIndicatorUtils* m_utils;
     QPointer<KNotification> m_updatesAvailableNotification;
     QPointer<KNotification> m_remoteUpdateNotification;
     QFileSystemWatcher *watcher = nullptr;
-    QString refPath="/var/run";
 
 private slots:
 
-     void updateCache();
-     void dbusDone(bool status);
+    void handleStartFinished(bool hideWidget);
+    void handleUpdatesFoundFinished(bool status);
+    void updateCache();
+    void updateStatus();
      
 };
 
-/**
- * Class monitoring the file system quota.
- * The monitoring is performed through a timer, running the 'quota'
- * command line tool.
- */
-
-class AsyncDbus: public QThread
-
-{
-
-    Q_OBJECT
-
-public:
-    
-    LliurexUpIndicator* llxindicator;
-    
-    AsyncDbus(LliurexUpIndicator* lliurexupindicator)
-     {
-        llxindicator = lliurexupindicator;
-     }
-
-     void run() override
-     {      
-
-        bool result=llxindicator->runUpdateCache();
-        emit message(result);
-
-     }
-     
-signals:
-
-    void message(bool);
-
-
-
-};
-
-
-#endif // PLASMA_LLIUREX_DISK_QUOTA_H
+#endif // PLASMA_LLIUREX_UP_INDICATOR_H

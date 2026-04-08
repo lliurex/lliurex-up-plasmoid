@@ -1,10 +1,8 @@
 #!/bin/bash
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 packageRoot=".."
-plasmoidName=$(kreadconfig5 --file ${DIR}/../applets/lliurexupnotifier/package/metadata.desktop --group="Desktop Entry" --key="X-KDE-PluginInfo-Name")
-website=$(kreadconfig5 --file ${DIR}/../applets/lliurexupnotifier/package/metadata.desktop --group="Desktop Entry" --key="X-KDE-PluginInfo-Website")
+plasmoidName="org.kde.plasma.lliurexupnotifier"
 widgetName="${plasmoidName##*.}"
-bugAddress="${website}"
 projectName="plasma_applet_${plasmoidName}"
 outFile="${projectName}.pot.new"
 
