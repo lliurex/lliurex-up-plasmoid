@@ -347,9 +347,19 @@ void LliurexUpIndicatorUtils::runSimulation(const QString &transPath) {
             return;
         }
 
-        const QDBusArgument arg = msg.arguments().at(0).value<QDBusVariant>().variant().value<QDBusArgument>();
-        
-        emit safeThis->updatesFound(!arg.atEnd());
+        QVariant var = msg.arguments().at(0).value<QDBusVariant>().variant();
+        const QDBusArgument arg = var.value<QDBusArgument>();
+
+        QList<QStringList> pkgLists;
+        arg >> pkgLists; 
+        bool thereAreUpdates = false;
+
+        if (pkgLists.size() >= 5) {
+            // Índex 4: Upgrades
+            // Índex 0: Installs
+            thereAreUpdates = !pkgLists.at(4).isEmpty() || !pkgLists.at(0).isEmpty();
+        }
+        emit safeThis->updatesFound(thereAreUpdates);
     });
 }
 
