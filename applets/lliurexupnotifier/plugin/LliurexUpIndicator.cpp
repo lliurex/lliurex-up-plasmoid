@@ -34,8 +34,6 @@
 LliurexUpIndicator::LliurexUpIndicator(QObject *parent)
     : QObject(parent)
     ,m_timer(new QTimer(this))
-    ,m_timer_run(new QTimer(this))
-    ,m_timer_cache(new QTimer(this))
     ,m_watcher_timer(new QTimer(this))
     ,m_utils(new LliurexUpIndicatorUtils(this))
     
@@ -46,7 +44,7 @@ LliurexUpIndicator::LliurexUpIndicator(QObject *parent)
     
     connect(m_utils,&LliurexUpIndicatorUtils::startWidgetFinished,this,&LliurexUpIndicator::handleStartFinished);
     connect(m_timer, &QTimer::timeout, this, &LliurexUpIndicator::worker);
-    connect(m_timer_run, &QTimer::timeout, this, &LliurexUpIndicator::updateStatus);
+    connect(m_utils, &LliurexUpIndicatorUtils::updatesFound, this, &LliurexUpIndicator::handleUpdatesFoundFinished);
 
     m_watcher_timer->setSingleShot(true);
     m_watcher_timer->setInterval(500);
@@ -96,13 +94,11 @@ void LliurexUpIndicator::updateStatus() {
     if (LliurexUpIndicator::DISABLE_WIDGET_TOKEN.exists()) return;
 
     if (LliurexUpIndicator::TARGET_FILE.exists()) {
-        if (!isWorking){
-            isWorking =true;
-            remoteUpdateInfo = true;
-            int iconState = m_utils->checkRemote() ? 2 : 1;
-            changeTryIconState(iconState, iconState == 2);
-
-            if (!m_timer_run->isActive()) m_timer_run->start(5000);
+        if (!isWorking && !isCacheWorking){
+           isWorking =true;
+           remoteUpdateInfo = true;
+           int iconState = m_utils->checkRemote() ? 2 : 1;
+           changeTryIconState(iconState, iconState == 2);
         }
         return;
     }
@@ -110,13 +106,16 @@ void LliurexUpIndicator::updateStatus() {
     if (isWorking) {
         isWorking = false;
         remoteUpdateInfo = false;
-        m_timer_run->stop();
-    }
+        m_watcher_timer->stop();
+        changeTryIconState(1,false);
 
-    if (m_utils->isAutoUpdateReady() && thereAreUpdates) {
-        changeTryIconState(0, !autoUpdatesDisplayed);
-    } else {
-        autoUpdatesDisplayed ? hideAutoUpdate() : changeTryIconState(1, false);
+    }
+    if (m_utils->isAutoUpdateReady()){
+        int state = thereAreUpdates ? 0 : 1;
+        bool showNotif = thereAreUpdates && !autoUpdatesDisplayed;
+        changeTryIconState(state, showNotif);
+    }else if (autoUpdatesDisplayed){
+        hideAutoUpdate();
     }
 }
 
@@ -138,28 +137,16 @@ void LliurexUpIndicator::worker(){
 
 void LliurexUpIndicator::updateCache() {
     
-    isWorking = true;
-    adbus = new AsyncDbus(this);
-    connect(adbus, &AsyncDbus::message, this, &LliurexUpIndicator::dbusDone);
-    adbus->start();
-}
-
-bool LliurexUpIndicator::runUpdateCache(){
-
-    return m_utils->runUpdateCache();
-
-}
-
-void LliurexUpIndicator::dbusDone(bool result) {
-    
-    isWorking = false;
-    
-    if (adbus) {
-        adbus->exit(0);
-        adbus->deleteLater();
-        adbus = nullptr;
+    if (!isCacheWorking && !isWorking){
+        isCacheWorking = true;
+        m_utils->runUpdateCache();
     }
+}
 
+void LliurexUpIndicator::handleUpdatesFoundFinished(bool result) {
+    
+    isCacheWorking = false;
+    
     if (result) {
         thereAreUpdates = true;
         changeTryIconState(0, true);

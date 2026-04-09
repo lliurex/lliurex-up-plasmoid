@@ -92,14 +92,11 @@ signals:
 
 private:
 
-    AsyncDbus* adbus;
     void initWatcher();
     void worker();
     void hideAutoUpdate();
 
     QTimer *m_timer = nullptr;
-    QTimer *m_timer_run=nullptr;
-    QTimer *m_timer_cache=nullptr;
     QTimer *m_watcher_timer = nullptr;
     TrayStatus m_status = PassiveStatus;
     QString m_iconName = QStringLiteral("lliurexupnotifier");
@@ -113,6 +110,7 @@ private:
     bool updatedInfo=false;
     bool remoteUpdateInfo=false;
     bool isWorking=false;
+    bool isCacheWorking=false;
     int lastUpdate=0;
     bool rememberUpdate=true;
     bool thereAreUpdates=false;
@@ -126,48 +124,10 @@ private:
 private slots:
 
     void handleStartFinished(bool hideWidget);
+    void handleUpdatesFoundFinished(bool status);
     void updateCache();
     void updateStatus();
-    void dbusDone(bool status);
      
 };
-
-/**
- * Class monitoring the file system quota.
- * The monitoring is performed through a timer, running the 'quota'
- * command line tool.
- */
-
-class AsyncDbus: public QThread
-
-{
-
-    Q_OBJECT
-
-public:
-    
-    LliurexUpIndicator* llxindicator;
-    
-    AsyncDbus(LliurexUpIndicator* lliurexupindicator)
-     {
-        llxindicator = lliurexupindicator;
-     }
-
-     void run() override
-     {      
-
-        bool result=llxindicator->runUpdateCache();
-        emit message(result);
-
-     }
-     
-signals:
-
-    void message(bool);
-
-
-
-};
-
 
 #endif // PLASMA_LLIUREX_UP_INDICATOR_H

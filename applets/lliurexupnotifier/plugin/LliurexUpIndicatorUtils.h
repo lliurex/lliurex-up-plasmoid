@@ -22,6 +22,7 @@
 #include <QObject>
 #include <QFile>
 #include <QStringList>
+#include <QtDBus/QDBusInterface>
 
 
 class QTimer;
@@ -37,27 +38,37 @@ public:
     QFile AUTO_UPDATE_RUN_TOKEN;
     QString refPath = "/var/run";
     QString user;
-    bool cacheUpdated = true;
     bool isStudent = false;
 
     void startWidget();
-    bool runUpdateCache();
-    bool simulateUpgrade();
+    void runUpdateCache();
     bool checkRemote();
     bool isCacheUpdated();
     bool isAutoUpdateReady();
     bool isAutoUpdateRun();
+    void checkUpdates();
+    void runSimulation(const QString &transPath);
     QString getAutoUpdateTime();
     bool canStopAutoUpdate();
     void stopAutoUpdate();
 
+public slots:
+
+    void onCacheFinished();
+
 signals:
+
     void startWidgetFinished(bool showWidget);
+    void updatesFound(bool hiHaActualitzacions);
 
 private:    
     QFile PKGCACHE;
     qint64 APT_FRECUENCY = 1200000;
     
+    bool m_updatingCache=false;
+    bool cacheUpdated = true;
+    QDBusInterface *m_transIface = nullptr; 
+    QString m_transPath;
     QStringList getFlavours();
     QStringList getUserGroups();
     bool isConnectionWithServer();
