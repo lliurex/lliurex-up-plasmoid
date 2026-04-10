@@ -111,7 +111,6 @@ void LliurexUpIndicatorUtils::startWidget(){
             emit safeThis->startWidgetFinished(hideWidget);
         }
     });
-
 }
 
 QStringList LliurexUpIndicatorUtils::getFlavours(){
@@ -127,22 +126,22 @@ QStringList LliurexUpIndicatorUtils::getFlavours(){
     }
 
     return flavours;
-
 }
 
 QStringList LliurexUpIndicatorUtils::getUserGroups(){
-    
+
     int j, ngroups=32;
     gid_t groups[32];
     struct passwd *pw;
     struct group *gr;
+
     QStringList userGroups;
     isStudent=false;
-
 
     QByteArray uname = user.toLocal8Bit();
     const char *username = uname.data();
     pw=getpwnam(username);
+
     getgrouplist(username, pw->pw_gid, groups, &ngroups);
     for (j = 0; j < ngroups; j++) {
         gr = getgrgid(groups[j]);
@@ -154,6 +153,7 @@ QStringList LliurexUpIndicatorUtils::getUserGroups(){
             } 
         }  
     }
+
     return userGroups;
 } 
 
@@ -166,6 +166,7 @@ void LliurexUpIndicatorUtils::runUpdateCache() {
     }
 
     QDBusConnection bus = QDBusConnection::systemBus();
+
     if (!bus.isConnected()) {
         emit updatesFound(false);
         return;
@@ -173,7 +174,7 @@ void LliurexUpIndicatorUtils::runUpdateCache() {
 
     m_updatingCache = true;
     QDBusInterface *aptIface = new QDBusInterface("org.debian.apt", "/org/debian/apt", "org.debian.apt", bus, this);
-    
+
     if (!aptIface->isValid()) {
         m_updatingCache = false;
         aptIface->deleteLater();
@@ -209,11 +210,11 @@ void LliurexUpIndicatorUtils::runUpdateCache() {
         }
 
         m_transIface = new QDBusInterface("org.debian.apt", path, "org.debian.apt.transaction", bus, this);
-        
+
         if (m_transIface->isValid()) {
             connect(m_transIface, SIGNAL(Finished(QString)), this, SLOT(onCacheFinished()));
             m_transIface->asyncCall(QStringLiteral("Run"));
-        } else {
+        }else{
             m_updatingCache = false;
             emit updatesFound(false);
         }
@@ -230,12 +231,14 @@ void LliurexUpIndicatorUtils::onCacheFinished(){
         m_transIface->deleteLater();
         m_transIface =nullptr;
     }
-    checkUpdates();
 
+    checkUpdates();
 }
+
 void LliurexUpIndicatorUtils::checkUpdates() {
 
     QDBusConnection bus = QDBusConnection::systemBus();
+
     if (!bus.isConnected()) {
         emit updatesFound(false);
         return;
@@ -244,14 +247,15 @@ void LliurexUpIndicatorUtils::checkUpdates() {
     auto *aptIface = new QDBusInterface("org.debian.apt", "/org/debian/apt", "org.debian.apt", bus, this);
     QDBusPendingCall call = aptIface->asyncCall("UpgradeSystem", true);
     auto *watcher = new QDBusPendingCallWatcher(call, aptIface);
-    
+
     QPointer<LliurexUpIndicatorUtils> safeThis(this);
     QPointer<QDBusInterface> safeIface(aptIface);
     QSharedPointer<bool> finished = QSharedPointer<bool>::create(false);
-    
+
     QTimer::singleShot(30000, this, [safeThis, safeIface,finished,call,bus]() {
-        
+
         if (*finished) return;
+
         *finished=true;
 
         if (call.isFinished()) {
@@ -269,7 +273,7 @@ void LliurexUpIndicatorUtils::checkUpdates() {
     });
 
     connect(watcher, &QDBusPendingCallWatcher::finished, this, [safeThis, safeIface, finished](QDBusPendingCallWatcher *self) {
-        
+
         if (*finished){
             safeIface->deleteLater();
             return;
@@ -279,18 +283,19 @@ void LliurexUpIndicatorUtils::checkUpdates() {
         if (!safeThis || !safeIface) {
             return;
         }   
+
         QDBusPendingReply<QString> reply = *self;
-        
+
         safeIface->deleteLater();
 
         if (reply.isError()) {
             emit safeThis->updatesFound(false);
-        } else {
+        }else{
             QString transPath = reply.value(); 
-        
+
             if (!transPath.isEmpty()) {
                 safeThis->runSimulation(transPath);
-            } else {
+            }else{
                 emit safeThis->updatesFound(false);
             }
         }
@@ -298,8 +303,9 @@ void LliurexUpIndicatorUtils::checkUpdates() {
 }
 
 void LliurexUpIndicatorUtils::runSimulation(const QString &transPath) {
-    
+
     QDBusConnection bus = QDBusConnection::systemBus();
+
     if (!bus.isConnected()) {
         emit updatesFound(false);
         return;
@@ -311,7 +317,6 @@ void LliurexUpIndicatorUtils::runSimulation(const QString &transPath) {
 
     QPointer<LliurexUpIndicatorUtils> safeThis(this);
     QPointer<QDBusInterface> safeTrans(transIface);
-    
     QSharedPointer<bool> finished = QSharedPointer<bool>::create(false);
 
     QTimer::singleShot(60000, this, [safeThis, safeTrans, finished, transPath, bus]() {
@@ -322,19 +327,19 @@ void LliurexUpIndicatorUtils::runSimulation(const QString &transPath) {
             safeTrans->call(QDBus::NoBlock, "Cancel");
             safeTrans->deleteLater();
         }
-        
         if (safeThis) emit safeThis->updatesFound(false);
     });
 
     connect(simWatcher, &QDBusPendingCallWatcher::finished, this, [safeThis, safeTrans, finished](QDBusPendingCallWatcher *self) {
+        
         if (*finished) {
             self->deleteLater();
             return;
         }
+
         *finished = true;
 
         if (!safeThis || !safeTrans) return;
-
         QDBusMessage msg = QDBusInterface("org.debian.apt", safeTrans->path(), 
                                          "org.freedesktop.DBus.Properties", 
                                          QDBusConnection::systemBus())
@@ -359,12 +364,13 @@ void LliurexUpIndicatorUtils::runSimulation(const QString &transPath) {
             // Índex 0: Installs
             thereAreUpdates = !pkgLists.at(4).isEmpty() || !pkgLists.at(0).isEmpty();
         }
+
         emit safeThis->updatesFound(thereAreUpdates);
     });
 }
 
 bool LliurexUpIndicatorUtils::checkRemote() {
-    
+
     QProcess ps;
     ps.start("ps", QStringList() << "-e" << "-o" << "tty=" << "-o" << "args=");
     ps.waitForFinished(1000);
@@ -410,8 +416,8 @@ bool LliurexUpIndicatorUtils::isCacheUpdated(){
     if (millisecondsDiff<APT_FRECUENCY){
         cacheUpdated=true;
     }
-    return cacheUpdated;
 
+    return cacheUpdated;
 }
 
 bool LliurexUpIndicatorUtils::isConnectionWithServer(){
@@ -421,11 +427,9 @@ bool LliurexUpIndicatorUtils::isConnectionWithServer(){
         client=n4d::Client("https://server:9779");
         variant::Variant test=client.call("MirrorManager","is_alive");
         return true;
-               
     }catch(...){
         return false;
     }
-     
 }
 
 bool LliurexUpIndicatorUtils::canStopAutoUpdate(){
@@ -438,7 +442,6 @@ bool LliurexUpIndicatorUtils::canStopAutoUpdate(){
     }catch(...){
         return false;
     }
-
 }
 
 bool LliurexUpIndicatorUtils::isAutoUpdateReady(){
@@ -448,11 +451,10 @@ bool LliurexUpIndicatorUtils::isAutoUpdateReady(){
     }else{
         return false;
     }
-   
 }
 
 bool LliurexUpIndicatorUtils::isAutoUpdateRun(){
-    
+
     if (AUTO_UPDATE_RUN_TOKEN.exists()){
         return true;
     }else{
@@ -469,8 +471,8 @@ QString LliurexUpIndicatorUtils::getAutoUpdateTime(){
             result=content.readLine();
             AUTO_UPDATE_TOKEN.close();
         }
-
     }
+    
     return result;
 }
 
@@ -485,5 +487,4 @@ void LliurexUpIndicatorUtils::stopAutoUpdate(){
     }catch(...){
         
     }
-    
 }
