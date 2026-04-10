@@ -347,9 +347,12 @@ bool LliurexUpIndicatorUtils::checkRemote() {
         QString tty  = parts[1];
         QString ppid = parts[2];
 
-        if (name.contains("sshd") || name.contains("konsole")) {
+        if (name.contains("sshd")){
             return true;
+        }
 
+        if (name.contains("konsole")) {
+            return false;
         }
 
         if (tty == "?" || tty.isEmpty()) {
