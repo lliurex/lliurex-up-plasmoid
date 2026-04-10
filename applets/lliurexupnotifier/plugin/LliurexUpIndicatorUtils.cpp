@@ -118,7 +118,6 @@ QStringList LliurexUpIndicatorUtils::getFlavours(){
     QProcess process;
     QStringList flavours;
     process.start(QStringLiteral("lliurex-version"), QStringList() << QStringLiteral("-v"));
-    process.waitForFinished(-1);
 
     if (process.waitForFinished(-1)) {
         QString stdout = QString::fromLocal8Bit(process.readAllStandardOutput());
