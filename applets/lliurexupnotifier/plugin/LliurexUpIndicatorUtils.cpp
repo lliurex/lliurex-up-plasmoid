@@ -20,23 +20,29 @@
 #include <QFile>
 #include <QDateTime>
 #include <QFileInfo>
-#include <QRegularExpression>
-#include <QStandardPaths>
+#include <QProcess>
 #include <QDebug>
-#include <QtDBus/QtDBus>
-#include <QDBusInterface>
-#include <QDBusMetaType>
-#include <QDBusConnection>
-#include <chrono>
+#include <QTextStream>
+#include <QTimer>
+#include <QEventLoop>
+
+#include <QPointer>
+
+#include <QtDBus/QDBusConnection>
+#include <QtDBus/QDBusInterface>
+#include <QtDBus/QDBusReply>
+#include <QtDBus/QDBusVariant>
+
+#include <QtConcurrent/QtConcurrentRun>
+
 #include <sys/types.h>
 #include <grp.h>
 #include <pwd.h>
+#include <unistd.h>
+
 #include <n4d.hpp>
-#include <variant.hpp>
-#include <thread>
 
 using namespace edupals;
-using namespace std;
 
 LliurexUpIndicatorUtils::LliurexUpIndicatorUtils(QObject *parent)
     : QObject(parent)
@@ -49,94 +55,93 @@ LliurexUpIndicatorUtils::LliurexUpIndicatorUtils(QObject *parent)
 
 }
 
-void LliurexUpIndicatorUtils::cleanCache(){
+void LliurexUpIndicatorUtils::startWidget(){
 
-    QFile CURRENT_VERSION_TOKEN;
-    QDir cacheDir("/home/"+user+"/.cache/plasmashell/qmlcache");
-    QString currentVersion="";
-    bool clear=false;
+    QPointer<LliurexUpIndicatorUtils>safeThis(this);
 
-    CURRENT_VERSION_TOKEN.setFileName("/home/"+user+"/.config/lliurex-up-indicator.conf");
-    QString installedVersion=getInstalledVersion();
+    QtConcurrent::run([safeThis]() {
 
-    if (!CURRENT_VERSION_TOKEN.exists()){
-        if (CURRENT_VERSION_TOKEN.open(QIODevice::WriteOnly)){
-            QTextStream data(&CURRENT_VERSION_TOKEN);
-            data<<installedVersion;
-            CURRENT_VERSION_TOKEN.close();
-            clear=true;
-        }
-    }else{
-        if (CURRENT_VERSION_TOKEN.open(QIODevice::ReadOnly)){
-            QTextStream content(&CURRENT_VERSION_TOKEN);
-            currentVersion=content.readLine();
-            CURRENT_VERSION_TOKEN.close();
+        if (!safeThis){
+            return;
         }
 
-        if (currentVersion!=installedVersion){
-            if (CURRENT_VERSION_TOKEN.open(QIODevice::WriteOnly)){
-                QTextStream data(&CURRENT_VERSION_TOKEN);
-                data<<installedVersion;
-                CURRENT_VERSION_TOKEN.close();
-                clear=true;
+        bool hideWidget=false;
+        bool isClient=false;
+        bool isDesktop=false;
+
+        QStringList flavours=safeThis->getFlavours();
+        QStringList userGroups=safeThis->getUserGroups();
+
+        if (userGroups.length()>0){
+            if (!flavours.contains("None")){
+                for (int i=0;i<flavours.count();i++){
+                    if (flavours[i].contains("client")){
+                        isClient=true; 
+                    }
+                    if (flavours[i].contains("desktop")){
+                        isDesktop=true;
+                    }
+                    if (flavours[i].contains("server")){
+                        if (userGroups.contains("teachers")){
+                            if ((!userGroups.contains("sudo")&&(!userGroups.contains("admins")))){
+                                hideWidget=true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }else{
+            if (!safeThis->isStudent){
+                hideWidget=true;
             }
         }
-    } 
-    if (clear){
-        if (cacheDir.exists()){
-            cacheDir.removeRecursively();
-        }
-    }   
 
+        if (isClient){
+            if (isDesktop){
+                if (safeThis->isConnectionWithServer()){
+                    hideWidget=true;
+                }
+            }else{
+                hideWidget=true;
+            }
+        }
+
+        if (safeThis){
+            emit safeThis->startWidgetFinished(hideWidget);
+        }
+    });
 }
-
-QString LliurexUpIndicatorUtils::getInstalledVersion(){
-
-    QFile INSTALLED_VERSION_TOKEN;
-    QString installedVersion="";
-    
-    INSTALLED_VERSION_TOKEN.setFileName("/var/lib/lliurex-up-indicator/version");
-
-    if (INSTALLED_VERSION_TOKEN.exists()){
-        if (INSTALLED_VERSION_TOKEN.open(QIODevice::ReadOnly)){
-            QTextStream content(&INSTALLED_VERSION_TOKEN);
-            installedVersion=content.readLine();
-            INSTALLED_VERSION_TOKEN.close();
-        }
-    }
-    return installedVersion;
-
-}    
 
 QStringList LliurexUpIndicatorUtils::getFlavours(){
 
     QProcess process;
     QStringList flavours;
-    QString cmd="lliurex-version -v";
-    process.start("/bin/sh",QStringList()<<"-c"<<cmd);
+    process.start(QStringLiteral("lliurex-version"), QStringList() << QStringLiteral("-v"));
     process.waitForFinished(-1);
-    QString stdout=process.readAllStandardOutput();
-    QString stderr=process.readAllStandardError();
-    flavours=stdout.split('\n');
+
+    if (process.waitForFinished(-1)) {
+        QString stdout = QString::fromLocal8Bit(process.readAllStandardOutput());
+        flavours = stdout.split(QLatin1Char('\n'), Qt::SkipEmptyParts);
+    }
 
     return flavours;
-
 }
 
 QStringList LliurexUpIndicatorUtils::getUserGroups(){
-    
 
     int j, ngroups=32;
     gid_t groups[32];
     struct passwd *pw;
     struct group *gr;
+
     QStringList userGroups;
     isStudent=false;
-
 
     QByteArray uname = user.toLocal8Bit();
     const char *username = uname.data();
     pw=getpwnam(username);
+
     getgrouplist(username, pw->pw_gid, groups, &ngroups);
     for (j = 0; j < ngroups; j++) {
         gr = getgrgid(groups[j]);
@@ -148,227 +153,258 @@ QStringList LliurexUpIndicatorUtils::getUserGroups(){
             } 
         }  
     }
+
     return userGroups;
-}    
+} 
 
-static bool simulateUpgrade(){
+void LliurexUpIndicatorUtils::runUpdateCache() {
 
-    if (!QDBusConnection::systemBus().isConnected()) {
-        return false;
+    if (m_updatingCache || cacheUpdated) {
+        cacheUpdated=false;
+        checkUpdates();
+        return;
     }
+
+    QDBusConnection bus = QDBusConnection::systemBus();
+
+    if (!bus.isConnected()) {
+        emit updatesFound(false);
+        return;
+    }
+
+    m_updatingCache = true;
+    QDBusInterface *aptIface = new QDBusInterface("org.debian.apt", "/org/debian/apt", "org.debian.apt", bus, this);
+
+    if (!aptIface->isValid()) {
+        m_updatingCache = false;
+        aptIface->deleteLater();
+        emit updatesFound(false); 
+        return;
+    }
+
+    QDBusPendingCall pcall = aptIface->asyncCall(QStringLiteral("UpdateCache"));
+    QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(pcall, this);
     
-    try{
-        
-        QDBusInterface iface("org.debian.apt",  // from list on left
-                         "/org/debian/apt", // from first line of screenshot
-                         "org.debian.apt",  // from above Methods
-                         QDBusConnection::systemBus());
+    connect(watcher, &QDBusPendingCallWatcher::finished, this, [this, bus, aptIface](QDBusPendingCallWatcher *self) {
+        QDBusPendingReply<QDBusObjectPath> reply = *self;
+        self->deleteLater();
+        aptIface->deleteLater();
 
-   
-        if (iface.isValid()){
-            QDBusMessage result=iface.call("UpgradeSystem",true);
-            QString transaction=result.arguments()[0].toString();
-            
-            QDBusInterface ifaceS("org.debian.apt",  // from list on left
-                            transaction, // from first line of screenshot
-                            "org.debian.apt.transaction",  // from above Methods
-                             QDBusConnection::systemBus());
+        if (reply.isError()) {
+            m_updatingCache = false;
+            emit updatesFound(false);
+            return;
+        }
 
-             
-            if (ifaceS.isValid()){
-                ifaceS.call("Simulate");
-              
-                QDBusInterface ifaceR("org.debian.apt",  // from list on left
-                                transaction, // from first line of screenshot
-                                "org.freedesktop.DBus.Properties",  // from above Methods
-                                 QDBusConnection::systemBus());
+        QString path = reply.value().path();
+        if (path.isEmpty()) {
+            m_updatingCache = false;
+            emit updatesFound(false);
+            return;
+        }
 
-                
+        if (m_transIface) {
+            m_transIface->disconnect();
+            m_transIface->deleteLater();
+            m_transIface = nullptr;
+        }
 
-                if (ifaceR.isValid()){
-                    QDBusMessage reply = ifaceR.call("Get", "org.debian.apt.transaction", "Dependencies");
-                     
-                    const QDBusArgument& dbusArgs=reply.arguments()[0].value<QDBusVariant>().variant().value<QDBusArgument>();
-                     
-                    QVariantList pkgList;
+        m_transIface = new QDBusInterface("org.debian.apt", path, "org.debian.apt.transaction", bus, this);
 
-                    dbusArgs.beginStructure();
-
-                    int cont=0;
-
-                    while(!dbusArgs.atEnd()) {
-                        cont=cont+1;
-                        if (cont<6){
-                            dbusArgs.beginArray();
-
-                            while(!dbusArgs.atEnd()) {
-                                QString s;
-                                dbusArgs>>s;
-                                pkgList.push_back(s);
-                            } 
-                        }      
-
-                        dbusArgs.endArray();
-                                       
-                    }       
-                    
-                    dbusArgs.endStructure();
-
-                    if (pkgList.size()>0){
-                        return true;
-                    }else{
-                        return false;
-                    }
-                }else{
-                    return false;
-                } 
-            }else{
-                return false;
-            }
+        if (m_transIface->isValid()) {
+            connect(m_transIface, SIGNAL(Finished(QString)), this, SLOT(onCacheFinished()));
+            m_transIface->asyncCall(QStringLiteral("Run"));
         }else{
-            return false;
+            m_updatingCache = false;
+            emit updatesFound(false);
         }
-  
-    }catch(...){
-
-        return false;
-    }
-
-}
-
-bool LliurexUpIndicatorUtils::runUpdateCache(){
-    
-    if (!cacheUpdated){
-
-        if (!QDBusConnection::systemBus().isConnected()) {
-            fprintf(stderr, "Cannot connect to the D-Bus session bus.\n"
-                    "To start it, run:\n"
-                    "\teval `dbus-launch --auto-syntax`\n");
-            return false;
-        }
-        
-          
-        try{
-            QDBusInterface iface("org.debian.apt",  // from list on left
-                             "/org/debian/apt", // from first line of screenshot
-                             "org.debian.apt",  // from above Methods
-                             QDBusConnection::systemBus());
-
-
-            if (iface.isValid()){
-                QDBusMessage resultU=iface.call("UpdateCache");
-                QString transactionU=resultU.arguments()[0].toString();
-                
-                QDBusInterface ifaceR("org.debian.apt",  // from list on left
-                                transactionU, // from first line of screenshot
-                                "org.debian.apt.transaction", // from above Methods
-                                 QDBusConnection::systemBus());
-
-
-               
-                if (ifaceR.isValid()){
-                    ifaceR.asyncCall("Run");
-
-                    QDBusInterface ifaceS("org.debian.apt",  // from list on left
-                                    transactionU, // from first line of screenshot
-                                    "org.freedesktop.DBus.Properties",  // from above Methods
-                                     QDBusConnection::systemBus());
-
-                    if (ifaceS.isValid()){
-                        std::this_thread::sleep_for(std::chrono::seconds(10));
-
-                        int match=0;
-                        int cont=0;
-                        int timeout=300;
-
-                        while (match==0){
-                            std::this_thread::sleep_for(std::chrono::seconds(1));
-                            QDBusMessage replyS = ifaceS.call("Get", "org.debian.apt.transaction", "ExitState");
-                            QString state = replyS.arguments()[0].value<QDBusVariant>().variant().toString();
-                            if (state != "exit-unfinished"){
-                                match=1;
-                            }else{
-                                cont=cont+1;
-                                if (cont>timeout){
-                                    return false;
-                                }
-
-                            }
-
-                        }
-                    }else{
-                        return false;
-                    }
-                }else{
-                    return false;
-                }
-            }else{
-                return false;
-            }
-
-        }catch(...){
-            return false;   
-        }
-    }
-    cacheUpdated=false;
-    return simulateUpgrade();
-}
-
-bool LliurexUpIndicatorUtils::checkRemote(){
-
-    int cont=0;
-
-    QStringList remotePts;
-    QProcess process;
-    QString cmd="who | grep -v \"(:0\"";
-
-    process.start("/bin/sh", QStringList()<< "-c" 
-                       << cmd);
-    process.waitForFinished(-1);
-    QString stdout=process.readAllStandardOutput();
-    QString stderr=process.readAllStandardError();
-    QStringList remoteUsers=stdout.split("\n");
-    remoteUsers.takeLast();
-
-    if (remoteUsers.size()>0){
-        QRegularExpression re("pts/\\d+");
-        QRegularExpressionMatch match = re.match(remoteUsers[0]);
-        if (match.hasMatch()) {
-            QString matched = match.captured(0);
-            remotePts.push_back(matched);
-        }  
-    }      
-
-    QProcess process2;
-    QString cmd2="ps -ef | grep 'lliurex-upgrade' | grep -v 'grep'";
-    process2.start("/bin/sh", QStringList()<< "-c" 
-                       << cmd2);
-    process2.waitForFinished(-1);
-    QString stdout2=process2.readAllStandardOutput();
-    QString stderr2=process2.readAllStandardError();
-    QStringList remoteProcess=stdout2.split("\n");
-    remoteProcess.takeLast();
-
-    for(int i=0 ; i < remoteProcess.length() ; i++){
-       if (remoteProcess[i].contains("?")){
-           cont=cont+1;
-       } // -> True
-
-       for (int j=0; j<remotePts.length();j++){
-            if (remoteProcess[i].contains(remotePts[j])){
-                cont=cont+1;
-            }
-       }
-    }
-
-    if (cont>0){
-        return true;
-
-    }else{
-        return false;
-    }
-
+    });
 }  
+
+void LliurexUpIndicatorUtils::onCacheFinished(){
+
+    cacheUpdated=false;
+    m_updatingCache = false;
+
+    if (m_transIface) {
+        m_transIface->disconnect();
+        m_transIface->deleteLater();
+        m_transIface =nullptr;
+    }
+
+    checkUpdates();
+}
+
+void LliurexUpIndicatorUtils::checkUpdates() {
+
+    QDBusConnection bus = QDBusConnection::systemBus();
+
+    if (!bus.isConnected()) {
+        emit updatesFound(false);
+        return;
+    }
+
+    auto *aptIface = new QDBusInterface("org.debian.apt", "/org/debian/apt", "org.debian.apt", bus, this);
+    QDBusPendingCall call = aptIface->asyncCall("UpgradeSystem", true);
+    auto *watcher = new QDBusPendingCallWatcher(call, aptIface);
+
+    QPointer<LliurexUpIndicatorUtils> safeThis(this);
+    QPointer<QDBusInterface> safeIface(aptIface);
+    QSharedPointer<bool> finished = QSharedPointer<bool>::create(false);
+
+    QTimer::singleShot(30000, this, [safeThis, safeIface,finished,call,bus]() {
+
+        if (*finished) return;
+
+        *finished=true;
+
+        if (call.isFinished()) {
+            QDBusPendingReply<QString> reply = call;
+            if (!reply.isError() && !reply.value().isEmpty()) {
+                QDBusInterface cancelIface("org.debian.apt", reply.value(), "org.debian.apt.transaction", bus);
+                cancelIface.call(QDBus::NoBlock, "Cancel");
+            }
+        }
+
+        if (safeIface) {
+            safeIface->deleteLater(); 
+            if (safeThis) emit safeThis->updatesFound(false);
+        }
+    });
+
+    connect(watcher, &QDBusPendingCallWatcher::finished, this, [safeThis, safeIface, finished](QDBusPendingCallWatcher *self) {
+
+        if (*finished){
+            safeIface->deleteLater();
+            return;
+        }
+        *finished=true;
+
+        if (!safeThis || !safeIface) {
+            return;
+        }   
+
+        QDBusPendingReply<QString> reply = *self;
+
+        safeIface->deleteLater();
+
+        if (reply.isError()) {
+            emit safeThis->updatesFound(false);
+        }else{
+            QString transPath = reply.value(); 
+
+            if (!transPath.isEmpty()) {
+                safeThis->runSimulation(transPath);
+            }else{
+                emit safeThis->updatesFound(false);
+            }
+        }
+    });
+}
+
+void LliurexUpIndicatorUtils::runSimulation(const QString &transPath) {
+
+    QDBusConnection bus = QDBusConnection::systemBus();
+
+    if (!bus.isConnected()) {
+        emit updatesFound(false);
+        return;
+    }
+
+    auto *transIface = new QDBusInterface("org.debian.apt", transPath, "org.debian.apt.transaction", bus, this);
+    QDBusPendingCall simCall = transIface->asyncCall(QStringLiteral("Simulate"));
+    auto *simWatcher = new QDBusPendingCallWatcher(simCall, transIface);
+
+    QPointer<LliurexUpIndicatorUtils> safeThis(this);
+    QPointer<QDBusInterface> safeTrans(transIface);
+    QSharedPointer<bool> finished = QSharedPointer<bool>::create(false);
+
+    QTimer::singleShot(60000, this, [safeThis, safeTrans, finished, transPath, bus]() {
+        if (*finished) return;
+        *finished = true;
+
+        if (safeTrans) {
+            safeTrans->call(QDBus::NoBlock, "Cancel");
+            safeTrans->deleteLater();
+        }
+        if (safeThis) emit safeThis->updatesFound(false);
+    });
+
+    connect(simWatcher, &QDBusPendingCallWatcher::finished, this, [safeThis, safeTrans, finished](QDBusPendingCallWatcher *self) {
+        
+        if (*finished) {
+            self->deleteLater();
+            return;
+        }
+
+        *finished = true;
+
+        if (!safeThis || !safeTrans) return;
+        QDBusMessage msg = QDBusInterface("org.debian.apt", safeTrans->path(), 
+                                         "org.freedesktop.DBus.Properties", 
+                                         QDBusConnection::systemBus())
+                           .call("Get", "org.debian.apt.transaction", "Dependencies");
+
+        safeTrans->deleteLater();
+
+        if (msg.type() == QDBusMessage::ErrorMessage) {
+            emit safeThis->updatesFound(false);
+            return;
+        }
+
+        QVariant var = msg.arguments().at(0).value<QDBusVariant>().variant();
+        const QDBusArgument arg = var.value<QDBusArgument>();
+
+        QList<QStringList> pkgLists;
+        arg >> pkgLists; 
+        bool thereAreUpdates = false;
+
+        if (pkgLists.size() >= 5) {
+            // Índex 4: Upgrades
+            // Índex 0: Installs
+            thereAreUpdates = !pkgLists.at(4).isEmpty() || !pkgLists.at(0).isEmpty();
+        }
+
+        emit safeThis->updatesFound(thereAreUpdates);
+    });
+}
+
+bool LliurexUpIndicatorUtils::checkRemote() {
+
+    QProcess ps;
+    ps.start("ps", QStringList() << "-e" << "-o" << "tty=" << "-o" << "args=");
+    ps.waitForFinished(1000);
+    QString psOut = QString::fromUtf8(ps.readAllStandardOutput());
+
+    QStringList remoteTtys;
+    QStringList lines = psOut.split(QLatin1Char('\n'), Qt::SkipEmptyParts);
+
+    for (const QString &line : lines) {
+        if (line.contains("lliurex-upgrade")) {
+            QString tty = line.section(' ', 0, 0).trimmed();
+            if (tty == "?") return true;
+            remoteTtys << tty;
+        }
+    }
+
+    if (remoteTtys.isEmpty()) return false;
+
+    QProcess who;
+    who.start(QStringLiteral("who"), QStringList());
+    who.waitForFinished(1000);
+    QString whoOut = QString::fromUtf8(who.readAllStandardOutput());
+
+    for (const QString &tty : remoteTtys) {
+        QStringList whoLines = whoOut.split(QLatin1Char('\n'), Qt::SkipEmptyParts);
+        for (const QString &wLine : whoLines) {
+            if (wLine.contains(tty) && !wLine.contains(":0")) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
 
 bool LliurexUpIndicatorUtils::isCacheUpdated(){
 
@@ -380,8 +416,8 @@ bool LliurexUpIndicatorUtils::isCacheUpdated(){
     if (millisecondsDiff<APT_FRECUENCY){
         cacheUpdated=true;
     }
-    return cacheUpdated;
 
+    return cacheUpdated;
 }
 
 bool LliurexUpIndicatorUtils::isConnectionWithServer(){
@@ -391,11 +427,9 @@ bool LliurexUpIndicatorUtils::isConnectionWithServer(){
         client=n4d::Client("https://server:9779");
         variant::Variant test=client.call("MirrorManager","is_alive");
         return true;
-               
     }catch(...){
         return false;
     }
-     
 }
 
 bool LliurexUpIndicatorUtils::canStopAutoUpdate(){
@@ -408,7 +442,6 @@ bool LliurexUpIndicatorUtils::canStopAutoUpdate(){
     }catch(...){
         return false;
     }
-
 }
 
 bool LliurexUpIndicatorUtils::isAutoUpdateReady(){
@@ -418,11 +451,10 @@ bool LliurexUpIndicatorUtils::isAutoUpdateReady(){
     }else{
         return false;
     }
-   
 }
 
 bool LliurexUpIndicatorUtils::isAutoUpdateRun(){
-    
+
     if (AUTO_UPDATE_RUN_TOKEN.exists()){
         return true;
     }else{
@@ -439,8 +471,8 @@ QString LliurexUpIndicatorUtils::getAutoUpdateTime(){
             result=content.readLine();
             AUTO_UPDATE_TOKEN.close();
         }
-
     }
+    
     return result;
 }
 
@@ -455,5 +487,4 @@ void LliurexUpIndicatorUtils::stopAutoUpdate(){
     }catch(...){
         
     }
-    
 }
