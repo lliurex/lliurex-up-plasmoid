@@ -187,7 +187,7 @@ void LliurexUpIndicatorUtils::checkUpdates() {
 
     if (!bus.isConnected()) {
         emit updatesFound(false);
-        return
+        return;
     }
 
     auto *aptIface = new QDBusInterface("org.debian.apt", "/org/debian/apt", "org.debian.apt", bus, this);
