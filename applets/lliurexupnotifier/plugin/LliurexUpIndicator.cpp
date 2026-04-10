@@ -178,7 +178,7 @@ void LliurexUpIndicator::changeTryIconState(int state, bool showNotification = t
                 QString body = i18n("The system will be update automatically at") + " " + m_utils->getAutoUpdateTime();
 
                 setToolTip(tooltip);
-                setSubToolTip(subToolTip + "\n" + body):
+                setSubToolTip(subToolTip + "\n" + body);
 
                 if (showNotification) {
                     m_updatesAvailableNotification = KNotification::event("Update", subToolTip, body, icon, nullptr, KNotification::CloseOnTimeout, "llxupnotifier");
