@@ -1,3 +1,9 @@
+lliurex-up-indicator (24.05.6) jammy; urgency=medium
+
+  * Refactorized code to improve performance
+  
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Fri, 10 Apr 2026 09:14:14 +0200
+
 lliurex-up-indicator (24.05.5) jammy; urgency=medium
 
   * Improved interaction with dbus
