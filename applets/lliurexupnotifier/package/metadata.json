@@ -22,8 +22,17 @@
         "Name[ca]": "LliureX Up",
         "Name[en_GB]": "LliureX Up",
         "Name[es]": "LliureX Up",
+        "Version":"2.0.0",
         "Website": "https://lliurex.net/"
     },
+    "Dependencies":[
+        {
+            "type":"qml",
+            "identifier": "org.kde.plasma.private.lliurexupnotifier",
+            "version":"2.0"
+        }
+    ],
+ 
     "X-Plasma-API-Minimum-Version": "6.0",
     "X-Plasma-NotificationAreaCategory": "SystemServices"
 }
