@@ -222,6 +222,7 @@ void LliurexUpIndicator::changeTryIconState(int state, bool showNotification = t
         }
         case 1: { 
             setStatus(PassiveStatus);
+            setIconName("lliurexupnotifier");
             QString lastExec = i18n("Last execution: ") + QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
             setSubToolTip(lastExec);
             if (m_remoteUpdateNotification) m_remoteUpdateNotification->close();
