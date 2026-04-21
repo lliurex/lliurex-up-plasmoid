@@ -1,3 +1,9 @@
+lliurex-up-indicator (24.05.8) jammy; urgency=medium
+
+  * Fixed icon to show when remote execution end
+  
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Tue, 21 Apr 2026 17:01:37 +0200
+
 lliurex-up-indicator (24.05.7) jammy; urgency=medium
 
   * Fixed bug in function used to detect flavours
