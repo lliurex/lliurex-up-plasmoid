@@ -1,3 +1,9 @@
+lliurex-up-indicator (25.05.16) noble; urgency=medium
+
+  * Fixed icon to show when remote execution end
+  
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Tue, 21 Apr 2026 16:52:01 +0200
+
 lliurex-up-indicator (25.05.15) noble; urgency=medium
 
   * Fixed detection of remote execution
