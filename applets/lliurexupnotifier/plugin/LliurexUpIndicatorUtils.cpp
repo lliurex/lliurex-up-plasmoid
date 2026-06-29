@@ -91,7 +91,7 @@ QStringList LliurexUpIndicatorUtils::getUserGroups(){
     for (j = 0; j < ngroups; j++) {
         gr = getgrgid(groups[j]);
         if (gr != NULL){
-            if ((strcmp(gr->gr_name,"adm")==0)||(strcmp(gr->gr_name,"admins")==0)||(strcmp(gr->gr_name,"teachers")==0)){
+            if ((strcmp(gr->gr_name,"adm")==0)||(strcmp(gr->gr_name,"admins")==0)||(strcmp(gr->gr_name,"teachers")==0) || (strcmp(gr->gr_name,"NoDocente")==0)){
                 userGroups.append(gr->gr_name);
             }else if (strcmp(gr->gr_name,"students")==0){
                 userGroups.append(gr->gr_name);
