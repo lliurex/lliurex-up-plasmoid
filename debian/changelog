@@ -1,3 +1,9 @@
+lliurex-up-indicator (24.05.9) jammy; urgency=medium
+
+  * Changed to allow NoDocente group to see indicator
+  
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Mon, 29 Jun 2026 11:04:12 +0200
+
 lliurex-up-indicator (24.05.8) jammy; urgency=medium
 
   * Fixed icon to show when remote execution end
