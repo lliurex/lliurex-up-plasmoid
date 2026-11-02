@@ -24,6 +24,8 @@
 #include <QStringList>
 #include <QtDBus/QDBusInterface>
 
+#include "LliurexUpIndicatorServiceSubscriber.h"
+
 
 class QTimer;
 
@@ -32,26 +34,26 @@ class LliurexUpIndicatorUtils : public QObject
     Q_OBJECT
 
 public:
-    explicit LliurexUpIndicatorUtils(QObject *parent = nullptr);
 
-    QFile AUTO_UPDATE_TOKEN;
-    QFile AUTO_UPDATE_RUN_TOKEN;
+    static LliurexUpIndicatorUtils& instance(){
+        static LliurexUpIndicatorUtils _instance;
+        return _instance;
+    }
+
+    LliurexUpIndicatorUtils(const LliurexUpIndicatorUtils&)=delete;
+    LliurexUpIndicatorUtils& operator=(const LliurexUpIndicatorUtils&) =delete;
+
     QString refPath = "/var/run";
     QString user;
     bool isStudent = false;
 
     void startWidget();
+    void createSubscription();
     void runUpdateCache();
     bool checkRemote();
     bool isCacheUpdated();
-    bool isAutoUpdateReady();
-    bool isAutoUpdateRun();
     void checkUpdates();
     void runSimulation(const QString &transPath);
-    QString getAutoUpdateTime();
-    QString getAutoUpdatePause();
-    bool canStopAutoUpdate();
-    void stopAutoUpdate();
 
 public slots:
 
@@ -61,17 +63,32 @@ signals:
 
     void startWidgetFinished(bool showWidget);
     void updatesFound(bool hiHaActualitzacions);
+    void unitStateChange(bool autoUpgradeRun);
 
-private:    
+private:
+
+    explicit LliurexUpIndicatorUtils();
+
     QFile PKGCACHE;
     qint64 APT_FRECUENCY = 1200000;
     
+    bool m_isStarting=false;
     bool m_updatingCache=false;
+    bool m_isCheckingUpdates=false;
     bool cacheUpdated = true;
+    bool m_isCreatingSubscription=false;
+
+    LliurexUpIndicatorServiceSubscriber* m_service;
+
+
     QDBusInterface *m_transIface = nullptr; 
     QString m_transPath;
     QStringList getUserGroups();
     bool isConnectionWithServer();
+
+private slots:
+     void handleCreateSubscriptionFinished(bool startOk);
+     void handleManageService(bool autoUpgradeRun);
 };
 
 #endif // PLASMA_LLIUREX_UP_INDICATOR_UTILS_H

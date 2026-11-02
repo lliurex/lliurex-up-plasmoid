@@ -6,7 +6,7 @@ import org.kde.plasma.components as PlasmaComponents3
 import org.kde.plasma.extras as PlasmaExtras
 import org.kde.kirigami as Kirigami
 
-import org.kde.plasma.private.lliurexupnotifier 2.0
+import org.kde.plasma.private.lliurexupnotifier 2.1
 // Item - the most basic plasmoid component, an empty container.
 
 PlasmoidItem {
@@ -58,27 +58,9 @@ PlasmoidItem {
             anchors.horizontalCenter:phMsg.horizontalCenter
             visible:lliurexUpIndicator.canLaunchLlxUp?true:false
             display:AbstractButton.TextBesideIcon
-            icon.name:{
-                if (lliurexUpIndicator.canStopAutoUpdate){
-                    "chronometer-pause"
-                }else{
-                    "lliurex-up"
-                }
-            }
-            text:{
-                if (lliurexUpIndicator.canStopAutoUpdate){
-                    i18n("Wait until tomorrow")
-                }else{
-                     i18n("Update the system")
-                }
-            }
-            onClicked:{
-                if (lliurexUpIndicator.canStopAutoUpdate){
-                    lliurexUpIndicator.cancelAutoUpdate()
-                }else{
-                    lliurexUpIndicator.launchLlxup()
-                }
-            }
+            icon.name:"lliurex-up"
+            text:i18n("Update the system")
+            onClicked:lliurexUpIndicator.launchLlxup()
         } 
         
     }
@@ -88,21 +70,6 @@ PlasmoidItem {
 
     }
 
-    function action_cancelAutoUpdate() {
-        lliurexUpIndicator.cancelAutoUpdate()
-
-    }
-
-    Plasmoid.contextualActions: [
-        PlasmaCore.Action{
-            text: i18n("Wait until tomorrow")
-            icon.name:"chronometer-pause.svg"
-            visible:lliurexUpIndicator.canStopAutoUpdate
-            enabled:lliurexUpIndicator.canStopAutoUpdate
-            onTriggered:action_cancelAutoUpdate()
-        }
-
-    ]
 
     PlasmaCore.Action {
         id: configureAction

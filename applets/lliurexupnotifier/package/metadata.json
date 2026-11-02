@@ -22,14 +22,14 @@
         "Name[ca]": "LliureX Up",
         "Name[en_GB]": "LliureX Up",
         "Name[es]": "LliureX Up",
-        "Version":"2.0.0",
+        "Version":"2.1.0",
         "Website": "https://lliurex.net/"
     },
     "Dependencies":[
         {
             "type":"qml",
             "identifier": "org.kde.plasma.private.lliurexupnotifier",
-            "version":"2.0"
+            "version":"2.1"
         }
     ],
  
