@@ -37,16 +37,13 @@
 #include <grp.h>
 #include <pwd.h>
 #include <unistd.h>
-#include <variant.hpp>
-#include <n4d.hpp>
-
-using namespace edupals;
-using namespace edupals::variant;
 
 LliurexUpIndicatorUtils::LliurexUpIndicatorUtils()
     : QObject(nullptr)
     , m_service(new LliurexUpIndicatorServiceSubscriber(this))
     , m_isStarting(false)
+    , m_isStarted(false)
+    , m_hideWidget(false)
     , m_updatingCache(false)
     , m_isCheckingUpdates(false)
     , m_isCreatingSubscription(false)
@@ -61,6 +58,11 @@ LliurexUpIndicatorUtils::LliurexUpIndicatorUtils()
 }
 
 void LliurexUpIndicatorUtils::startWidget(){
+
+    if (m_isStarted){
+        emit startWidgetFinished(m_hideWidget);
+        return;
+    }
 
     if (m_isStarting){
         return;
@@ -84,6 +86,8 @@ void LliurexUpIndicatorUtils::startWidget(){
         }
         if (safeThis){
             safeThis->m_isStarting=false;
+            safeThis->m_isStarted=true;
+            safeThis->m_hideWidget=hideWidget;
             emit safeThis->startWidgetFinished(hideWidget);
         }
     });

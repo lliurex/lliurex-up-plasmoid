@@ -73,6 +73,8 @@ private:
     qint64 APT_FRECUENCY = 1200000;
     
     bool m_isStarting=false;
+    bool m_isStarted=false;
+    bool m_hideWidget=false;
     bool m_updatingCache=false;
     bool m_isCheckingUpdates=false;
     bool cacheUpdated = true;
