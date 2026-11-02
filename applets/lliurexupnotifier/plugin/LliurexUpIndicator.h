@@ -39,7 +39,6 @@ class LliurexUpIndicator : public QObject
     Q_PROPERTY(QString subToolTip READ subToolTip NOTIFY subToolTipChanged)
     Q_PROPERTY(QString iconName READ iconName NOTIFY iconNameChanged)
     Q_PROPERTY(bool canLaunchLlxUp READ canLaunchLlxUp NOTIFY canLaunchLlxUpChanged)
-    Q_PROPERTY(bool canStopAutoUpdate READ canStopAutoUpdate NOTIFY canStopAutoUpdateChanged)
     Q_ENUMS(TrayStatus)
 
 public:
@@ -70,16 +69,12 @@ public:
     bool canLaunchLlxUp();
     void setCanLaunchLlxUp(bool);
 
-    bool canStopAutoUpdate();
-    void setCanStopAutoUpdate(bool);
-
     bool runUpdateCache();
 
 
 public slots:
     
     void launchLlxup();
-    void cancelAutoUpdate();
 
 signals:
    
@@ -88,13 +83,11 @@ signals:
     void subToolTipChanged();
     void iconNameChanged();
     void canLaunchLlxUpChanged();
-    void canStopAutoUpdateChanged();
 
 private:
 
     void initWatcher();
     void worker();
-    void hideAutoUpdate();
 
     QTimer *m_timer = nullptr;
     QTimer *m_watcher_timer = nullptr;
@@ -103,20 +96,19 @@ private:
     QString m_toolTip;
     QString m_subToolTip;
     bool m_canLaunchLlxUp=true;
-    bool m_canStopAutoUpdate=false;
     QFile TARGET_FILE;
     QFile DISABLE_WIDGET_TOKEN;
+    QFile DISABLE_AUTO_UPGRADE_INTEGRATION_TOKEN;
     int FREQUENCY=3600;
     bool updatedInfo=false;
     bool remoteUpdateInfo=false;
     bool isWorking=false;
     bool isCacheWorking=false;
+    bool pauseWidget=false;
     int lastUpdate=0;
-    bool rememberUpdate=true;
-    bool thereAreUpdates=false;
-    bool autoUpdatesDisplayed=false;
 
     LliurexUpIndicatorUtils* m_utils;
+    
     QPointer<KNotification> m_updatesAvailableNotification;
     QPointer<KNotification> m_remoteUpdateNotification;
     QFileSystemWatcher *watcher = nullptr;
@@ -127,6 +119,7 @@ private slots:
     void handleUpdatesFoundFinished(bool status);
     void updateCache();
     void updateStatus();
+    void handleUnitStateChanged(bool pauseWidget);
      
 };
 

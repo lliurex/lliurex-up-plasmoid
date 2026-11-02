@@ -12,6 +12,7 @@ set(upnotifier_SRCS
     plugin/plugin.cpp
     plugin/LliurexUpIndicator.cpp
     plugin/LliurexUpIndicatorUtils.cpp
+    plugin/LliurexUpIndicatorServiceSubscriber.cpp
    
 )
 

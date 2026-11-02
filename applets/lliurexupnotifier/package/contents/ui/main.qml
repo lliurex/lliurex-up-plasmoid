@@ -4,7 +4,7 @@ import org.kde.plasma.plasmoid 2.0
 import org.kde.plasma.core 2.1 as PlasmaCore
 import org.kde.plasma.components 3.0 as PlasmaComponents3
 import org.kde.plasma.extras 2.0 as PlasmaExtras
-import org.kde.plasma.private.lliurexupnotifier 2.0
+import org.kde.plasma.private.lliurexupnotifier 2.1
 
 // Item - the most basic plasmoid component, an empty container.
 Item {
@@ -62,38 +62,15 @@ Item {
             anchors.horizontalCenter:phMsg.horizontalCenter
             visible:lliurexUpIndicator.canLaunchLlxUp?true:false
             display:AbstractButton.TextBesideIcon
-            icon.name:{
-                if (lliurexUpIndicator.canStopAutoUpdate){
-                    "chronometer-pause"
-                }else{
-                    "lliurex-up"
-                }
-            }
-            text:{
-                if (lliurexUpIndicator.canStopAutoUpdate){
-                    i18n("Wait until tomorrow")
-                }else{
-                     i18n("Update the system")
-                }
-            }
-            onClicked:{
-                if (lliurexUpIndicator.canStopAutoUpdate){
-                    lliurexUpIndicator.cancelAutoUpdate()
-                }else{
-                    lliurexUpIndicator.launchLlxup()
-                }
-            }
+            icon.name:"lliurex-up"
+            text:i18n("Update the system")
+            onClicked:lliurexUpIndicator.launchLlxup()
         } 
         
     }
 
- 
     function action_llxup() {
         lliurexUpIndicator.launchLlxup()
-    }
-
-    function action_cancelAutoUpdate() {
-        lliurexUpIndicator.cancelAutoUpdate()
     }
 
     function populateContextualActions() {
@@ -103,10 +80,6 @@ Item {
         plasmoid.action("llxup").enabled = lliurexUpIndicator.canLaunchLlxUp
         plasmoid.action("llxup").visible = lliurexUpIndicator.canLaunchLlxUp
 
-        plasmoid.setAction("cancelAutoUpdate", i18n("Wait until tomorrow"),"chronometer-pause.svg")
-        plasmoid.action("cancelAutoUpdate").enabled = lliurexUpIndicator.canStopAutoUpdate
-        plasmoid.action("cancelAutoUpdate").visible = lliurexUpIndicator.canStopAutoUpdate
-
-    }
+   }
 
  }	
