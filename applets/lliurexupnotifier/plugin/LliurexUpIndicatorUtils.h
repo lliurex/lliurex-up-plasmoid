@@ -78,6 +78,7 @@ private:
     bool m_isCheckingUpdates=false;
     bool cacheUpdated = true;
     bool m_isCreatingSubscription=false;
+    bool m_isSubscribed=false;
     bool m_hideWidget=false;
 
     LliurexUpIndicatorServiceSubscriber* m_service;

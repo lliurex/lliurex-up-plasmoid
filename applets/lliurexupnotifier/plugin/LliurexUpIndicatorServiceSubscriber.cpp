@@ -111,6 +111,7 @@ void LliurexUpIndicatorServiceSubscriber::createSubscription(){
 
         if (unitReply.isError()) {
             m_isSubscribed=false;
+            m_isSubscribing=false;
             emit createSubscriptionFinished(false);
             return;
         }
