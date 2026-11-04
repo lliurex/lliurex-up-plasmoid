@@ -160,7 +160,6 @@ void LliurexUpIndicatorUtils::runUpdateCache() {
         return;
     }
     
-
     m_updatingCache = true;
 
     QDBusConnection bus = QDBusConnection::systemBus();
@@ -526,12 +525,28 @@ bool LliurexUpIndicatorUtils::checkRemote() {
 bool LliurexUpIndicatorUtils::isCacheUpdated(){
 
     QDateTime currentTime=QDateTime::currentDateTime();
-    QDateTime lastModification=QFileInfo(PKGCACHE).lastModified();    
+
+    if (lastCheckTime.isValid() && lastCheckTime.msecsTo(currentTime)<1000){
+        return cacheUpdated;
+    }
+ 
+    QFileInfo pkgCacheInfo(PKGCACHE);
+
+    if (!pkgCacheInfo.exists()){
+        cacheUpdated=false;
+        return cacheUpdated;
+    }
+
+    lastCheckTime=currentTime;
+
+    QDateTime lastModification=pkgCacheInfo.lastModified();    
 
     qint64 millisecondsDiff = lastModification.msecsTo(currentTime);
 
     if (millisecondsDiff<APT_FRECUENCY){
         cacheUpdated=true;
+    }else{
+        cacheUpdated=false;
     }
 
     return cacheUpdated;

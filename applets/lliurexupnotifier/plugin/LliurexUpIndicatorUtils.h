@@ -86,6 +86,7 @@ private:
 
     QDBusInterface *m_transIface = nullptr; 
     QString m_transPath;
+    QDateTime lastCheckTime;
     QStringList getUserGroups();
     bool isConnectionWithServer();
 
