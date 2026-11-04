@@ -79,10 +79,19 @@ void LliurexUpIndicator::handleStartFinished(bool hideWidget){
 
 void LliurexUpIndicator::handleUnitStateChanged(bool autoUpgradeRun){
 
-    pauseWidget=autoUpgradeRun;
+    bool forceUpdate=false;
 
+    if (pauseWidget!=autoUpgradeRun){
+        if (pauseWidget){
+            forceUpdate=true;
+        }
+        pauseWidget=autoUpgradeRun;
+    }
+    
     if (pauseWidget && !isWorking){
         changeTryIconState(1,false);
+    }else if (forceUpdate && !remoteUpdateInfo){
+        updateCache();
     }
 }
 
@@ -134,7 +143,6 @@ void LliurexUpIndicator::worker(){
     if (updatedInfo && !remoteUpdateInfo) {
         lastUpdate += 1200;
         if (lastUpdate >= FREQUENCY || m_utils->isCacheUpdated()) {
-            lastUpdate = 0;
             if (!pauseWidget){
                 updateCache();
             }
@@ -144,6 +152,8 @@ void LliurexUpIndicator::worker(){
 
 void LliurexUpIndicator::updateCache() {
 
+    lastUpdate=0;
+    
     if (!isCacheWorking && !isWorking){
         isCacheWorking = true;
         m_utils->runUpdateCache();

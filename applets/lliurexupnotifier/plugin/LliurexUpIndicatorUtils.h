@@ -20,6 +20,7 @@
 #define PLASMA_LLIUREX_UP_INDICATOR_UTILS_H
 
 #include <QObject>
+#include <QDateTime>
 #include <QFile>
 #include <QStringList>
 #include <QtDBus/QDBusInterface>
@@ -86,6 +87,7 @@ private:
 
     QDBusInterface *m_transIface = nullptr; 
     QString m_transPath;
+    QDateTime lastCheckTime;
     QStringList getFlavours();
     QStringList getUserGroups();
     bool isConnectionWithServer();
