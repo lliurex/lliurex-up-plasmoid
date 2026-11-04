@@ -8,16 +8,17 @@ plasma_install_package(package org.kde.plasma.lliurexupnotifier)
 # Notes Library
 set(PLUGIN_TARGET "lliurexupnotifierplugin")
 add_definitions(-DTRANSLATION_DOMAIN="plasma_applet_org.kde.plasma.lliurexupnotifier")
-ecm_add_qml_module(${PLUGIN_TARGET} URI org.kde.plasma.private.lliurexupnotifier VERSION 2.0)
+ecm_add_qml_module(${PLUGIN_TARGET} URI org.kde.plasma.private.lliurexupnotifier VERSION 2.1)
 
 target_sources(${PLUGIN_TARGET} PRIVATE
     plugin/plugin.cpp
     plugin/LliurexUpIndicator.cpp
     plugin/LliurexUpIndicatorUtils.cpp
+    plugin/LliurexUpIndicatorServiceSubscriber.cpp
     plugin/plugin.h
     plugin/LliurexUpIndicator.h
     plugin/LliurexUpIndicatorUtils.h
-   
+    plugin/LliurexUpIndicatorServiceSubscriber.h
    
 )
 
