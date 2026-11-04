@@ -16,6 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "LliurexUpIndicatorUtils.h"
+#include "LliurexUpIndicatorServiceSubscriber.h"
 
 #include <QFile>
 #include <QDateTime>
@@ -24,8 +25,6 @@
 #include <QDebug>
 #include <QTextStream>
 #include <QTimer>
-#include <QEventLoop>
-
 #include <QPointer>
 
 #include <QtDBus/QDBusConnection>
@@ -44,18 +43,39 @@
 
 using namespace edupals;
 
-LliurexUpIndicatorUtils::LliurexUpIndicatorUtils(QObject *parent)
-    : QObject(parent)
+LliurexUpIndicatorUtils::LliurexUpIndicatorUtils()
+    : QObject(nullptr)
+    , m_service(new LliurexUpIndicatorServiceSubscriber(this))
+    , m_isStarting(false)
+    , m_isStarted(false)
+    , m_hideWidget(false)
+    , m_updatingCache(false)
+    , m_isCheckingUpdates(false)
+    , m_isCreatingSubscription(false)
+    , m_isSubscribed(false)
+    , cacheUpdated(true)
+
        
 {
     user=qgetenv("USER");
     PKGCACHE.setFileName("/var/cache/apt/pkgcache.bin");
-    AUTO_UPDATE_TOKEN.setFileName("/var/run/lliurex-up-auto-upgrade.token");
-    AUTO_UPDATE_RUN_TOKEN.setFileName("/var/run/lliurex-up-auto-upgrade.lock");
+    connect(m_service,&LliurexUpIndicatorServiceSubscriber::createSubscriptionFinished,this,&LliurexUpIndicatorUtils::handleCreateSubscriptionFinished);
+    connect(m_service,&LliurexUpIndicatorServiceSubscriber::serviceStateChanged,this,&LliurexUpIndicatorUtils::handleManageService);
 
 }
 
 void LliurexUpIndicatorUtils::startWidget(){
+
+    if (m_isStarted){
+        emit startWidgetFinished(m_hideWidget);
+        return;
+    }
+
+    if (m_isStarting){
+        return;
+    }
+
+    m_isStarting=true;
 
     QPointer<LliurexUpIndicatorUtils>safeThis(this);
 
@@ -108,6 +128,9 @@ void LliurexUpIndicatorUtils::startWidget(){
         }
 
         if (safeThis){
+            safeThis->m_isStarting=false;
+            safeThis->m_isStarted=true;
+            safeThis->m_hideWidget=hideWidget;
             emit safeThis->startWidgetFinished(hideWidget);
         }
     });
@@ -154,24 +177,56 @@ QStringList LliurexUpIndicatorUtils::getUserGroups(){
     }
 
     return userGroups;
-} 
+}
+
+void LliurexUpIndicatorUtils::createSubscription(){
+
+    if (m_isSubscribed){
+        return;
+    }
+
+    if (m_isCreatingSubscription){
+        return;
+    }
+
+    m_isCreatingSubscription=true;
+    m_service->initSubscription();
+}
+
+void LliurexUpIndicatorUtils::handleCreateSubscriptionFinished(bool startOk){
+
+    m_isCreatingSubscription=false;
+    m_isSubscribed=true;
+
+}
+
+void LliurexUpIndicatorUtils::handleManageService(bool autoUpgradeRun){
+
+    emit unitStateChange(autoUpgradeRun);
+}
 
 void LliurexUpIndicatorUtils::runUpdateCache() {
 
-    if (m_updatingCache || cacheUpdated) {
+    if (m_updatingCache) {
+        return;
+    }
+   
+    if (cacheUpdated) {
         cacheUpdated=false;
         checkUpdates();
         return;
     }
 
+    m_updatingCache = true;
+
     QDBusConnection bus = QDBusConnection::systemBus();
 
     if (!bus.isConnected()) {
+        m_updatingCache = false;
         emit updatesFound(false);
         return;
     }
 
-    m_updatingCache = true;
     QDBusInterface *aptIface = new QDBusInterface("org.debian.apt", "/org/debian/apt", "org.debian.apt", bus, this);
 
     if (!aptIface->isValid()) {
@@ -183,20 +238,23 @@ void LliurexUpIndicatorUtils::runUpdateCache() {
 
     QDBusPendingCall pcall = aptIface->asyncCall(QStringLiteral("UpdateCache"));
     QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(pcall, this);
-    
+
     connect(watcher, &QDBusPendingCallWatcher::finished, this, [this, bus, aptIface](QDBusPendingCallWatcher *self) {
-        QDBusPendingReply<QDBusObjectPath> reply = *self;
+        QDBusPendingReply<QString> reply = *self;
         self->deleteLater();
         aptIface->deleteLater();
 
         if (reply.isError()) {
+            qDebug()<<"[LLIUREX-UP-INDICATOR]: runUpdateCache reply error: "<<reply.error().message();
             m_updatingCache = false;
             emit updatesFound(false);
             return;
         }
 
-        QString path = reply.value().path();
+        QString path = reply.value();
+
         if (path.isEmpty()) {
+            qDebug()<<"[LLIUREX-UP-INDICATOR]: runUpdateCache empty path"<<path;
             m_updatingCache = false;
             emit updatesFound(false);
             return;
@@ -212,9 +270,29 @@ void LliurexUpIndicatorUtils::runUpdateCache() {
 
         if (m_transIface->isValid()) {
             connect(m_transIface, SIGNAL(Finished(QString)), this, SLOT(onCacheFinished()));
-            m_transIface->asyncCall(QStringLiteral("Run"));
+            QDBusPendingCall runCall = m_transIface->asyncCall(QStringLiteral("Run"));
+            QDBusPendingCallWatcher *runWatcher = new QDBusPendingCallWatcher(runCall, this);
+
+            connect(runWatcher, &QDBusPendingCallWatcher::finished, this, [this](QDBusPendingCallWatcher *runSelf) {
+                QDBusPendingReply<void> runReply = *runSelf;
+                runSelf->deleteLater();
+
+                if (runReply.isError()){
+                    qDebug()<<"[LLIUREX-UP-INDICATOR]: runUpdateCache error execution call:"<<runReply.error().message();
+                    m_updatingCache=false;
+                    emit updatesFound(false);
+
+                    if (m_transIface){
+                        m_transIface->deleteLater();
+                        m_transIface=nullptr;
+                    }
+                }
+            });
+
         }else{
             m_updatingCache = false;
+            m_transIface->deleteLater();
+            m_transIface = nullptr;
             emit updatesFound(false);
         }
     });
@@ -236,24 +314,43 @@ void LliurexUpIndicatorUtils::onCacheFinished(){
 
 void LliurexUpIndicatorUtils::checkUpdates() {
 
+    if (m_isCheckingUpdates){
+        return;
+    }
+
+    m_isCheckingUpdates=true;
+
     QDBusConnection bus = QDBusConnection::systemBus();
 
     if (!bus.isConnected()) {
+        m_isCheckingUpdates=false;
         emit updatesFound(false);
         return;
     }
 
     auto *aptIface = new QDBusInterface("org.debian.apt", "/org/debian/apt", "org.debian.apt", bus, this);
+    
+    if (!aptIface->isValid()){
+        m_isCheckingUpdates=false;
+        aptIface->deleteLater();
+        emit updatesFound(false);
+        return;
+    }
+
     QDBusPendingCall call = aptIface->asyncCall("UpgradeSystem", true);
     auto *watcher = new QDBusPendingCallWatcher(call, aptIface);
 
     QPointer<LliurexUpIndicatorUtils> safeThis(this);
     QPointer<QDBusInterface> safeIface(aptIface);
-    QSharedPointer<bool> finished = QSharedPointer<bool>::create(false);
+    QPointer<QDBusPendingCallWatcher>safeWatcher(watcher);
 
-    QTimer::singleShot(30000, this, [safeThis, safeIface,finished,call,bus]() {
+    auto finished = QSharedPointer<bool>::create(false);
 
-        if (*finished) return;
+    QTimer::singleShot(30000, this, [safeThis, safeIface,safeWatcher,finished,call,bus]() {
+
+        if (!safeThis || *finished) {
+            return;
+        }
 
         *finished=true;
 
@@ -264,39 +361,54 @@ void LliurexUpIndicatorUtils::checkUpdates() {
                 cancelIface.call(QDBus::NoBlock, "Cancel");
             }
         }
-
+        
+        if (safeWatcher){
+            safeWatcher->deleteLater();
+        }
+        
         if (safeIface) {
             safeIface->deleteLater(); 
-            if (safeThis) emit safeThis->updatesFound(false);
         }
+      
+        safeThis->m_isCheckingUpdates=false;
+        emit safeThis->updatesFound(false);
+    
     });
 
-    connect(watcher, &QDBusPendingCallWatcher::finished, this, [safeThis, safeIface, finished](QDBusPendingCallWatcher *self) {
-
-        if (*finished){
-            safeIface->deleteLater();
-            return;
+    connect(watcher, &QDBusPendingCallWatcher::finished, this, [safeThis, safeIface, safeWatcher,finished](QDBusPendingCallWatcher *self) {
+        
+        if (!safeThis || *finished){
+             return;
         }
+
         *finished=true;
 
-        if (!safeThis || !safeIface) {
-            return;
-        }   
+        if (safeWatcher){
+            safeWatcher->deleteLater();
+        }
+
+        if (safeIface) {
+            safeIface->deleteLater();
+    
+        }
 
         QDBusPendingReply<QString> reply = *self;
 
-        safeIface->deleteLater();
-
         if (reply.isError()) {
+            qDebug()<<"[LLIUREX-UP-INDICATOR]: checkUpdates reply error:"<<reply.error().message();
+            safeThis->m_isCheckingUpdates=false;
             emit safeThis->updatesFound(false);
-        }else{
-            QString transPath = reply.value(); 
+            return;
+        }
+        
+        QString transPath = reply.value(); 
 
-            if (!transPath.isEmpty()) {
-                safeThis->runSimulation(transPath);
-            }else{
-                emit safeThis->updatesFound(false);
-            }
+        if (!transPath.isEmpty()) {
+            safeThis->runSimulation(transPath);
+        }else{
+            qDebug()<<"[LLIUREX-UP-INDICATOR]: checkUpdates empty path:"<<transPath;
+            safeThis->m_isCheckingUpdates=false;
+            emit safeThis->updatesFound(false);
         }
     });
 }
@@ -306,39 +418,74 @@ void LliurexUpIndicatorUtils::runSimulation(const QString &transPath) {
     QDBusConnection bus = QDBusConnection::systemBus();
 
     if (!bus.isConnected()) {
+        m_isCheckingUpdates=false;
         emit updatesFound(false);
         return;
     }
 
     auto *transIface = new QDBusInterface("org.debian.apt", transPath, "org.debian.apt.transaction", bus, this);
+    
+    if (!transIface->isValid()){
+        m_isCheckingUpdates=false;
+        transIface->deleteLater();
+        emit updatesFound(false);
+        return;
+    }
+
     QDBusPendingCall simCall = transIface->asyncCall(QStringLiteral("Simulate"));
-    auto *simWatcher = new QDBusPendingCallWatcher(simCall, transIface);
+    auto *simWatcher = new QDBusPendingCallWatcher(simCall, this);
 
     QPointer<LliurexUpIndicatorUtils> safeThis(this);
     QPointer<QDBusInterface> safeTrans(transIface);
-    QSharedPointer<bool> finished = QSharedPointer<bool>::create(false);
+    QPointer<QDBusPendingCallWatcher>safeWatcher(simWatcher);
 
-    QTimer::singleShot(60000, this, [safeThis, safeTrans, finished, transPath, bus]() {
-        if (*finished) return;
+    auto finished = QSharedPointer<bool>::create(false);
+
+    QTimer::singleShot(60000, this, [safeThis, safeTrans, safeWatcher,finished ]() {
+
+        if (!safeThis || *finished) {
+            return;
+        }
+
         *finished = true;
 
         if (safeTrans) {
             safeTrans->call(QDBus::NoBlock, "Cancel");
             safeTrans->deleteLater();
         }
-        if (safeThis) emit safeThis->updatesFound(false);
+
+        if (safeWatcher){
+            safeWatcher->deleteLater();
+        }
+        
+        safeThis->m_isCheckingUpdates=false;
+        safeThis->updatesFound(false);
     });
 
-    connect(simWatcher, &QDBusPendingCallWatcher::finished, this, [safeThis, safeTrans, finished](QDBusPendingCallWatcher *self) {
+    connect(simWatcher, &QDBusPendingCallWatcher::finished, this, [safeThis, safeTrans, safeWatcher, finished]() {
+
+        if (!safeThis || *finished) {
+             return;
+        }
         
-        if (*finished) {
-            self->deleteLater();
+        *finished = true;
+
+        QString currentPath= safeTrans ? safeTrans->path() : QString();
+
+        if (safeWatcher){
+            safeWatcher->deleteLater();
+        }
+
+        if (safeTrans){
+            safeTrans->deleteLater();
+        }
+
+        if (currentPath.isEmpty()){
+            safeThis->m_isCheckingUpdates=false;
+            emit safeThis->updatesFound(false);
             return;
         }
 
-        *finished = true;
-
-        if (!safeThis || !safeTrans) return;
         QDBusMessage msg = QDBusInterface("org.debian.apt", safeTrans->path(), 
                                          "org.freedesktop.DBus.Properties", 
                                          QDBusConnection::systemBus())
@@ -347,6 +494,14 @@ void LliurexUpIndicatorUtils::runSimulation(const QString &transPath) {
         safeTrans->deleteLater();
 
         if (msg.type() == QDBusMessage::ErrorMessage) {
+            qDebug()<<"[LLIUREX-UP-INDICATOR]: runSimulation error :"<<msg.errorMessage();
+            safeThis->m_isCheckingUpdates=false;
+            emit safeThis->updatesFound(false);
+            return;
+        }
+
+        if (msg.arguments().isEmpty()){
+            safeThis->m_isCheckingUpdates=false;
             emit safeThis->updatesFound(false);
             return;
         }
@@ -363,7 +518,8 @@ void LliurexUpIndicatorUtils::runSimulation(const QString &transPath) {
             // Índex 0: Installs
             thereAreUpdates = !pkgLists.at(4).isEmpty() || !pkgLists.at(0).isEmpty();
         }
-
+        
+        safeThis->m_isCheckingUpdates=false;
         emit safeThis->updatesFound(thereAreUpdates);
     });
 }
@@ -408,12 +564,28 @@ bool LliurexUpIndicatorUtils::checkRemote() {
 bool LliurexUpIndicatorUtils::isCacheUpdated(){
 
     QDateTime currentTime=QDateTime::currentDateTime();
-    QDateTime lastModification=QFileInfo(PKGCACHE).lastModified();    
+
+    if (lastCheckTime.isValid() && lastCheckTime.msecsTo(currentTime)<1000){
+        return cacheUpdated;
+    }
+ 
+    QFileInfo pkgCacheInfo(PKGCACHE);
+
+    if (!pkgCacheInfo.exists()){
+        cacheUpdated=false;
+        return cacheUpdated;
+    }
+
+    lastCheckTime=currentTime;
+
+    QDateTime lastModification=pkgCacheInfo.lastModified();    
 
     qint64 millisecondsDiff = lastModification.msecsTo(currentTime);
 
     if (millisecondsDiff<APT_FRECUENCY){
         cacheUpdated=true;
+    }else{
+        cacheUpdated=false;
     }
 
     return cacheUpdated;
@@ -428,62 +600,5 @@ bool LliurexUpIndicatorUtils::isConnectionWithServer(){
         return true;
     }catch(...){
         return false;
-    }
-}
-
-bool LliurexUpIndicatorUtils::canStopAutoUpdate(){
-
-    try{
-        n4d::Client localClient;
-        localClient=n4d::Client("https://localhost:9779");
-        variant::Variant result=localClient.call("LliurexUpManager","can_cancel_auto_upgrade");
-        return result;
-    }catch(...){
-        return false;
-    }
-}
-
-bool LliurexUpIndicatorUtils::isAutoUpdateReady(){
-
-    if (AUTO_UPDATE_TOKEN.exists()){
-        return true;
-    }else{
-        return false;
-    }
-}
-
-bool LliurexUpIndicatorUtils::isAutoUpdateRun(){
-
-    if (AUTO_UPDATE_RUN_TOKEN.exists()){
-        return true;
-    }else{
-        return false;
-    }
-}
-
-QString LliurexUpIndicatorUtils::getAutoUpdateTime(){
-
-    QString result;
-    if (LliurexUpIndicatorUtils::isAutoUpdateReady()){
-        if (AUTO_UPDATE_TOKEN.open(QIODevice::ReadOnly)){
-            QTextStream content(&AUTO_UPDATE_TOKEN);
-            result=content.readLine();
-            AUTO_UPDATE_TOKEN.close();
-        }
-    }
-    
-    return result;
-}
-
-void LliurexUpIndicatorUtils::stopAutoUpdate(){
-
-    try{
-        if (!AUTO_UPDATE_RUN_TOKEN.exists()){
-            n4d::Client localClient;
-            localClient=n4d::Client("https://localhost:9779");
-            localClient.call("LliurexUpManager","stop_auto_update_service");
-        }
-    }catch(...){
-        
     }
 }

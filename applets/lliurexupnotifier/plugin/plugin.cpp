@@ -23,6 +23,6 @@
 void LliurexUpIndicatorPlugin::registerTypes (const char *uri)
 {
     Q_ASSERT(uri == QLatin1String("org.kde.plasma.private.lliurexupnotifier"));
-    qmlRegisterType<LliurexUpIndicator>(uri, 2, 0, "LliurexUpIndicator");
+    qmlRegisterType<LliurexUpIndicator>(uri, 2, 1, "LliurexUpIndicator");
 
 }
