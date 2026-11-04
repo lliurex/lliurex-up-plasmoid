@@ -1,3 +1,10 @@
+lliurex-up-indicator (24.05.10) jammy; urgency=medium
+
+  * Improved performance when widget is running in two or more panels
+  * Added integration with lliurex-auto-upgrade service to hide widget if necessary
+
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Wed, 04 Nov 2026 12:54:12 +0100
+
 lliurex-up-indicator (24.05.9) jammy; urgency=medium
 
   * Changed to allow NoDocente group to see indicator
