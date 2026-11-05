@@ -91,7 +91,7 @@ signals:
 private:
 
     void initWatcher();
-    void worker();
+    void worker(bool forceUpdate=false);
 
     QTimer *m_timer = nullptr;
     QTimer *m_watcher_timer = nullptr;
