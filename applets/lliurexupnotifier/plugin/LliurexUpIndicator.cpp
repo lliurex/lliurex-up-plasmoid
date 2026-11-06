@@ -148,10 +148,8 @@ void LliurexUpIndicator::worker(bool forceUpdate){
             updateCache();
         }else{
             lastUpdate += 1200;
-            qDebug()<<"[LLIUREX-UP-INDICATOR]:worker"<<lastUpdate<<pauseWidget;
             if (lastUpdate >= FREQUENCY || m_utils->isCacheUpdated()) {
                 if (!pauseWidget){
-                    qDebug()<<"[LLIUREX-UP-INDICATOR]:worker-updateCache";
                     updateCache();
                 }
             }
