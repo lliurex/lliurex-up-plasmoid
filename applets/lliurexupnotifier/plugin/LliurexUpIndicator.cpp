@@ -43,7 +43,9 @@ LliurexUpIndicator::LliurexUpIndicator(QObject *parent)
     DISABLE_AUTO_UPGRADE_INTEGRATION_TOKEN.setFileName("/etc/lliurex-up-indicator/disableAutoUpgradeIntegration.token");
 
     connect(m_utils,&LliurexUpIndicatorUtils::startWidgetFinished,this,&LliurexUpIndicator::handleStartFinished);
-    connect(m_timer, &QTimer::timeout, this, &LliurexUpIndicator::worker);
+    connect(m_timer, &QTimer::timeout, this, [this](){
+        worker();
+    });
     connect(m_utils, &LliurexUpIndicatorUtils::updatesFound, this, &LliurexUpIndicator::handleUpdatesFoundFinished);
     connect(m_utils, &LliurexUpIndicatorUtils::unitStateChange, this, &LliurexUpIndicator::handleUnitStateChanged);
 
@@ -73,7 +75,7 @@ void LliurexUpIndicator::handleStartFinished(bool hideWidget){
 
     m_timer->start(1200000);
     initWatcher();
-    worker();
+    worker(true);
  
 }
 
@@ -134,17 +136,21 @@ void LliurexUpIndicator::updateStatus() {
     }
 }
 
-void LliurexUpIndicator::worker(){
+void LliurexUpIndicator::worker(bool forceUpdate){
 
     if (isWorking || LliurexUpIndicator::DISABLE_WIDGET_TOKEN.exists()){
         return;
     }
 
     if (updatedInfo && !remoteUpdateInfo) {
-        lastUpdate += 1200;
-        if (lastUpdate >= FREQUENCY || m_utils->isCacheUpdated()) {
-            if (!pauseWidget){
-                updateCache();
+        if (forceUpdate && !pauseWidget){
+            updateCache();
+        }else{
+            lastUpdate += 1200;
+            if (lastUpdate >= FREQUENCY || m_utils->isCacheUpdated()) {
+                if (!pauseWidget){
+                    updateCache();
+                }
             }
         }
     }
@@ -165,7 +171,9 @@ void LliurexUpIndicator::handleUpdatesFoundFinished(bool result) {
     isCacheWorking = false;
 
     if (result) {
-        changeTryIconState(0, true);
+        if (!pauseWidget){
+            changeTryIconState(0, true);
+        }
     }else{
         changeTryIconState(1,false);
     }
