@@ -140,8 +140,9 @@ void LliurexUpIndicatorServiceSubscriber::createSubscription(){
                                                         "StatusText");
 
                 if (reply.errorMessage().isEmpty()) {
-                    if (reply.arguments().isEmpty()){
-                        QVariant firstArgument = reply.arguments().at(0).value<QDBusVariant>().variant();
+                    if (!reply.arguments().isEmpty()){
+                        QDBusVariant dbusVariant = reply.arguments().at(0).value<QDBusVariant>();
+                        QVariant firstArgument = dbusVariant.variant();
                         QString initialStatusText = firstArgument.toString();
 
                         if (!initialStatusText.isEmpty()) {
