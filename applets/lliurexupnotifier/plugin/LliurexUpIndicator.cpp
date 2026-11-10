@@ -75,17 +75,17 @@ void LliurexUpIndicator::handleStartFinished(bool hideWidget){
 
     m_timer->start(1200000);
     initWatcher();
-    worker(true);
+    worker();
  
 }
 
 void LliurexUpIndicator::handleUnitStateChanged(bool autoUpgradeRun){
 
-    bool forceUpdate=false;
-
     if (pauseWidget!=autoUpgradeRun){
         if (pauseWidget){
             forceUpdate=true;
+        }else{
+            forceUpdate=false;
         }
         pauseWidget=autoUpgradeRun;
     }
@@ -133,10 +133,11 @@ void LliurexUpIndicator::updateStatus() {
         remoteUpdateInfo = false;
         m_watcher_timer->stop();
         changeTryIconState(1,false);
+
     }
 }
 
-void LliurexUpIndicator::worker(bool forceUpdate){
+void LliurexUpIndicator::worker(){
 
     if (isWorking || LliurexUpIndicator::DISABLE_WIDGET_TOKEN.exists()){
         return;
@@ -172,7 +173,13 @@ void LliurexUpIndicator::handleUpdatesFoundFinished(bool result) {
 
     if (result) {
         if (!pauseWidget){
-            changeTryIconState(0, true);
+            if (forceUpdate){
+                forceUpdate=false;
+                changeTryIconState(0,false);
+
+            }else{
+                changeTryIconState(0, true);
+            }
         }
     }else{
         changeTryIconState(1,false);
