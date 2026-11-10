@@ -1,3 +1,9 @@
+lliurex-up-indicator (24.05.11) jammy; urgency=medium
+
+  * Changed to avoid showing notification when the check is performed following the execution of auto-upgrade
+  
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Tue, 10 Nov 2026 15:35:07 +0100
+
 lliurex-up-indicator (24.05.10) jammy; urgency=medium
 
   * Improved performance when widget is running in two or more panels
