@@ -1,3 +1,9 @@
+lliurex-up-indicator (25.05.21) noble; urgency=medium
+
+  * Changed to avoid showing notification when the check is performed following the execution of auto-ugprade 
+  
+ -- Juan Ramon Pelegrina <juapesai@hotmail.com>  Tue, 10 Nov 2026 11:17:51 +0100
+
 lliurex-up-indicator (25.05.20) noble; urgency=medium
 
   * Improved interaction with dbus-aptdaemon
