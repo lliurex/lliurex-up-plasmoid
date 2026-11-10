@@ -91,7 +91,7 @@ signals:
 private:
 
     void initWatcher();
-    void worker(bool forceUpdate=false);
+    void worker();
 
     QTimer *m_timer = nullptr;
     QTimer *m_watcher_timer = nullptr;
@@ -110,6 +110,7 @@ private:
     bool isCacheWorking=false;
     bool pauseWidget=false;
     int lastUpdate=0;
+    bool forceUpdate=false;
 
     LliurexUpIndicatorUtils* m_utils;
     
