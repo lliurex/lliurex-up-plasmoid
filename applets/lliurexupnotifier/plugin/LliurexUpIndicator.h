@@ -106,6 +106,7 @@ private:
     bool isCacheWorking=false;
     bool pauseWidget=false;
     int lastUpdate=0;
+    bool forceUpdate=false;
 
     LliurexUpIndicatorUtils* m_utils;
     

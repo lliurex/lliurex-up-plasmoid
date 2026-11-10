@@ -43,7 +43,9 @@ LliurexUpIndicator::LliurexUpIndicator(QObject *parent)
     DISABLE_AUTO_UPGRADE_INTEGRATION_TOKEN.setFileName("/etc/lliurex-up-indicator/disableAutoUpgradeIntegration.token");
 
     connect(m_utils,&LliurexUpIndicatorUtils::startWidgetFinished,this,&LliurexUpIndicator::handleStartFinished);
-    connect(m_timer, &QTimer::timeout, this, &LliurexUpIndicator::worker);
+    connect(m_timer, &QTimer::timeout, this, [this](){
+        worker();
+    });
     connect(m_utils, &LliurexUpIndicatorUtils::updatesFound, this, &LliurexUpIndicator::handleUpdatesFoundFinished);
     connect(m_utils, &LliurexUpIndicatorUtils::unitStateChange, this, &LliurexUpIndicator::handleUnitStateChanged);
 
@@ -79,11 +81,11 @@ void LliurexUpIndicator::handleStartFinished(bool hideWidget){
 
 void LliurexUpIndicator::handleUnitStateChanged(bool autoUpgradeRun){
 
-    bool forceUpdate=false;
-
     if (pauseWidget!=autoUpgradeRun){
         if (pauseWidget){
             forceUpdate=true;
+        }else{
+            forceUpdate=false;
         }
         pauseWidget=autoUpgradeRun;
     }
@@ -131,6 +133,7 @@ void LliurexUpIndicator::updateStatus() {
         remoteUpdateInfo = false;
         m_watcher_timer->stop();
         changeTryIconState(1,false);
+
     }
 }
 
@@ -141,10 +144,14 @@ void LliurexUpIndicator::worker(){
     }
 
     if (updatedInfo && !remoteUpdateInfo) {
-        lastUpdate += 1200;
-        if (lastUpdate >= FREQUENCY || m_utils->isCacheUpdated()) {
-            if (!pauseWidget){
-                updateCache();
+        if (forceUpdate && !pauseWidget){
+            updateCache();
+        }else{
+            lastUpdate += 1200;
+            if (lastUpdate >= FREQUENCY || m_utils->isCacheUpdated()) {
+                if (!pauseWidget){
+                    updateCache();
+                }
             }
         }
     }
@@ -165,7 +172,15 @@ void LliurexUpIndicator::handleUpdatesFoundFinished(bool result) {
     isCacheWorking = false;
 
     if (result) {
-        changeTryIconState(0, true);
+        if (!pauseWidget){
+            if (forceUpdate){
+                forceUpdate=false;
+                changeTryIconState(0,false);
+
+            }else{
+                changeTryIconState(0, true);
+            }
+        }
     }else{
         changeTryIconState(1,false);
     }
